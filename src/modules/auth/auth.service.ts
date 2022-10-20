@@ -8,16 +8,16 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { JwtPayloadDto } from './dto/jwt-payload.dto';
-import { User } from '../../entities/user.entity';
+import { Users } from '../../entities/users.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    @InjectRepository(Users)
+    private usersRepository: Repository<Users>,
     private jwtService: JwtService,
   ) {}
-
+/*
   async register(username: string, password: string) {
     const user = await this.usersRepository.findOne({ username });
 
@@ -61,5 +61,5 @@ export class AuthService {
     delete user.password;
 
     return user;
-  }
+  }*/
 }

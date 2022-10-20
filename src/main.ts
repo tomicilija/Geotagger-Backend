@@ -8,7 +8,7 @@ const initSwagger = (app: INestApplication) => {
     .setTitle('Guess the location')
     .setDescription('Guess the location API')
     .setVersion('1.0')
-    .addTag('Guess Location')
+    .addTag('Geotagger')
     .addBearerAuth()
     .build();
 

@@ -6,12 +6,12 @@ import {
 } from 'typeorm';
 
 export class CustomBaseEntity extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' }) // Date_time with timezone
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' }) // Date_time with timezone
   updatedAt: Date;
 }
