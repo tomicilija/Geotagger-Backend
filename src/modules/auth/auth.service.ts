@@ -27,8 +27,6 @@ export class AuthService {
     return this.authRepository.register(userRegisterDto);
   }
 
-  
-/*
   // Signs in user with email and pass
   async login(loginUserDto: UserLoginDto): Promise<{ accessToken: string }> {
     const { email, password } = loginUserDto;
@@ -47,5 +45,4 @@ export class AuthService {
       throw new UnauthorizedException('Please check your login creentials');
     }
   }
-  */
 }
