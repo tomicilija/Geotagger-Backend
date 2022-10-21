@@ -2,6 +2,7 @@ import { Entity, Column, OneToMany } from 'typeorm';
 import { Locations } from './locations.entity';
 import { Guesses } from './guesses.entity';
 import { CustomBaseEntity } from './base.entity';
+import { type } from 'os';
 
 @Entity()
 export class Users extends CustomBaseEntity {
@@ -17,15 +18,18 @@ export class Users extends CustomBaseEntity {
   @Column()
   surname: string;
 
+  @Column()
+  profilePicture: string;
+
   @OneToMany(
     () => Locations,
-    location => location.user_id,
+    (locations) => locations.user,
   )
   locations: Locations[];
 
   @OneToMany(
     () => Guesses,
-    guess => guess.user_id,
+    (guesses) => guesses.user,
   )
   guesses: Guesses[];
 }

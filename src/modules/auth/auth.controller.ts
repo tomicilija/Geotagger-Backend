@@ -5,19 +5,16 @@ import { UserRegisterDto } from './dto/user-register.dto';
 
 @Controller('auth')
 export class AuthController {
+  // Controller declares a dependency on the UserService token with constructor
   constructor(private readonly authService: AuthService) {}
-/*
-  @Post('login')
-  async login(@Body() dto: UserLoginDto) {
-    const user = await this.authService.validateUser(
-      dto.username,
-      dto.password,
-    );
-    return this.authService.login(user);
-  }
 
-  @Post('register')
-  async register(@Body() dto: UserRegisterDto) {
-    return this.authService.register(dto.username, dto.password);
+  @Post('/register')
+  async register(@Body() userRegisterDto: UserRegisterDto) {
+    return this.authService.register(userRegisterDto);
+  }
+  /*
+  @Post('/login')
+  async login(@Body() userLoginDto: UserLoginDto): Promise<{ accessToken: string }>  {
+    return this.authService.login(userLoginDto);
   }*/
 }
