@@ -23,13 +23,13 @@ export class Users extends CustomBaseEntity {
 
   @OneToMany(
     () => Locations,
-    (locations) => locations.user,
+    (locations) => locations.user_id,
   )
   locations: Locations[];
 
   @OneToMany(
     () => Guesses,
-    (guesses) => guesses.user,
+    (guesses) => guesses.user_id,
   )
   guesses: Guesses[];
 }

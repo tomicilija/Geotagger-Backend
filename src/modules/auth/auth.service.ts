@@ -22,12 +22,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  // Creates user with email, pass, name, surname and profile picture
   async register(userRegisterDto: UserRegisterDto): Promise<void> {
     return this.authRepository.register(userRegisterDto);
   }
 
-  // Signs in user with email and pass
   async login(loginUserDto: UserLoginDto): Promise<{ accessToken: string }> {
     const { email, password } = loginUserDto;
     const user = await this.authRepository.findOne({
@@ -36,7 +34,6 @@ export class AuthService {
       },
     });
 
-    // Checks if there is user found and if password matches with one in database
     if (user && (await bcrypt.compare(password, user.password))) {
       const payload: JwtPayloadDto = { email };
       const accessToken: string = this.jwtService.sign(payload);

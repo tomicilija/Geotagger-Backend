@@ -7,7 +7,7 @@ import {
 
 export class CustomBaseEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @CreateDateColumn({ type: 'timestamptz' }) // Date_time with timezone
   createdAt: Date;

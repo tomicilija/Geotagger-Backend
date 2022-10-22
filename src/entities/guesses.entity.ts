@@ -14,8 +14,10 @@ export class Guesses extends CustomBaseEntity {
   distance: number;
 
   @ManyToOne(() => Users, (user) => user.id, { cascade: true })
-  user: Users;
+  @JoinColumn({ name: 'user_id' })
+  user_id: string;
 
   @ManyToOne(() => Locations, (location) => location.id, { cascade: true })
-  location: Locations;
+  @JoinColumn({ name: 'quote_id' })
+  location_id: string;
 }
