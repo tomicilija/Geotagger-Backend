@@ -8,22 +8,34 @@ import {
 } from 'class-validator';
 
 export class LocationDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Location name or adress',
+    example: 'Velenje',
+  })
   @IsString()
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Location coordiantes expressed as latitude',
+    example: '46.356637',
+  })
   @IsNotEmpty()
   @IsLatitude()
   latitude: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Location coordiantes expressed as longitude',
+    example: '15.131544',
+  })
   @IsNotEmpty()
   @IsLongitude()
   longitude: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Path to image that shows location for users to guess',
+    example: 'path/locationImage',
+  })
   @IsNotEmpty()
-  @IsUrl()
+  //@IsUrl()
   image: string;
 }

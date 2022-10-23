@@ -24,9 +24,12 @@ export class Locations extends CustomBaseEntity {
   @Column()
   image: string;
 
-  @ManyToOne(() => Users, (user) => user.id, { cascade: true })
-  @JoinColumn({ name: 'user_id' })
+  @Column()
   user_id: string;
+
+  @ManyToOne(() => Users, (user) => user.id, { cascade: true })
+  @JoinColumn({ name: 'user_id'})
+  user: string;
 
   @OneToMany(() => Guesses, (guess) => guess.location_id)
   guesses: Guesses[];

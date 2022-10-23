@@ -2,12 +2,18 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, Matches, MinLength } from 'class-validator';
 
 export class UserRegisterDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'User e-mail adress',
+    example: 'ilija.tomic@gmail.com',
+  })
   @IsNotEmpty()
   @IsEmail()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'User password',
+    example: 'Passw123',
+  })
   @IsNotEmpty()
   @MinLength(8, {
     message: 'Password must be longer than or equal to 8 characters\n',
@@ -21,19 +27,31 @@ export class UserRegisterDto {
   })
   password: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Confirm user password',
+    example: 'Passw123',
+  })
   @IsNotEmpty()
   passwordConfirm: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'First name',
+    example: 'Ilija',
+  })
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Last/Family name',
+    example: 'Tomic',
+  })
   @IsNotEmpty()
   surname: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Path of a profile picture',
+    example: 'path/DefaultPicture',
+  })
   @IsNotEmpty()
   profilePicture: string;
 }

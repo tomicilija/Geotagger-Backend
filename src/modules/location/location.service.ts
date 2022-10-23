@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LocationRepository } from './location.repository';
 import { Locations } from '../../entities/locations.entity';
@@ -7,7 +7,6 @@ import { Users } from '../../entities/users.entity';
 
 @Injectable()
 export class LocationService {
-  private logger = new Logger('LocationService');
   constructor(
     @InjectRepository(LocationRepository)
     private locationRepository: LocationRepository,
@@ -24,7 +23,6 @@ export class LocationService {
   async getLocationById(id: string): Promise<Locations> {
     return this.locationRepository.getLocationById(id);
   }
-
   async createLocation(
     user: Users,
     locationDto: LocationDto,

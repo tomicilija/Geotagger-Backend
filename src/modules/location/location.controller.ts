@@ -6,13 +6,17 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Locations } from '../../entities/locations.entity';
 import { Users } from '../../entities/users.entity';
 import { GetUser } from '../user/get-user.decorator';
 import { LocationDto } from './dto/location.dto';
 import { LocationService } from './location.service';
 
+@ApiTags('Location')
 @Controller('location')
 export class LocationController {
   constructor(private locationService: LocationService) {}
@@ -33,6 +37,8 @@ export class LocationController {
   }
 
   @Post()
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   async createLocation(
     @GetUser() user: Users,
     @Body() locationDto: LocationDto,
@@ -41,6 +47,8 @@ export class LocationController {
   }
 
   @Delete('/delete/:id')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   async deleteLocation(
     @GetUser() user: Users,
     @Param('id') id: string,
@@ -49,11 +57,13 @@ export class LocationController {
   }
 
   @Patch('/edit/:id')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   async editLocation(
     @GetUser() user: Users,
     @Param('id') id: string,
-    @Body() LocationDto: LocationDto,
+    @Body() locationDto: LocationDto,
   ): Promise<Locations> {
-    return this.locationService.editLocation(user, id, LocationDto);
+    return this.locationService.editLocation(user, id, locationDto);
   }
 }
