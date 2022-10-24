@@ -2,24 +2,15 @@ import { EntityRepository, Repository } from 'typeorm';
 import {
   ConflictException,
   InternalServerErrorException,
-  UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { Users } from '../../entities/users.entity';
 import { UserRegisterDto } from './dto/user-register.dto';
 import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
-import { UserLoginDto } from './dto/user-login.dto';
-import { JwtPayloadDto } from './dto/jwt-payload.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 
 @EntityRepository(Users)
 export class AuthRepository extends Repository<Users> {
-  constructor( // To make JwtService work
-    @InjectRepository(AuthRepository)
-    private jwtService: JwtService,
-  ) {
-    super();
-  }
+  private logger = new Logger('AuthRepository');
 
   // Creates user with email, pass, name, surname and profile picture
   async register(userRegisterDto: UserRegisterDto): Promise<void> {
@@ -34,7 +25,10 @@ export class AuthRepository extends Repository<Users> {
 
     // Do passwords match?
     if (password !== passwordConfirm) {
-      throw new ConflictException('Passwords do not match');
+      this.logger.verbose(
+        `Passwords do not match!`,
+      );
+      throw new ConflictException('Passwords do not match!');
     } else {
       // Password Hash
       const salt = await bcrypt.genSalt();
@@ -48,14 +42,20 @@ export class AuthRepository extends Repository<Users> {
       });
       try {
         await this.save(user);
+        this.logger.verbose(
+          `User with ${email} email is saved in a database!`,
+        );
       } catch (error) {
         //Catches Duplicate email with error code 23505
         if (error.code === '23505') {
+          this.logger.verbose(
+            `User is already registerd with "${email}" email!`,
+          );
           throw new ConflictException(
-            'User is already registerd with that email!',
+            `User is already registerd with "${email}" email!`,
           );
         } else {
-          throw new InternalServerErrorException();
+          throw new InternalServerErrorException(error);
         }
       }
     }

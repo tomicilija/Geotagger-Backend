@@ -28,7 +28,6 @@ export class GuessRepository extends Repository<Guesses> {
     this.logger.verbose(
       `Fetched ${getGuesses.length} guesses for location: ${id} from the database!`,
     );
-    console.log(getGuesses)
     return getGuesses;
   }
 
@@ -43,13 +42,15 @@ export class GuessRepository extends Repository<Guesses> {
     ]);
 
     if (!location) {
-      this.logger.error(`Location not found!`);
-      throw new NotFoundException(`Location not found!`);
+      this.logger.error(`Location with ID: ${id} not found!`);
+      throw new NotFoundException(`Location with ID: ${id} not found!`);
     }
     const checkGuess = await this.findOne({
       where: {
-        location_id: id, // eslint-disable-line @typescript-eslint/camelcase
-        user_id: user.id, // eslint-disable-line @typescript-eslint/camelcase
+        /* eslint-disable @typescript-eslint/camelcase*/
+        location_id: id,
+        user_id: user.id,
+        /* eslint-enable @typescript-eslint/camelcase*/
       },
     });
 

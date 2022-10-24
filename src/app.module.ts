@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { LocationModule } from './modules/location/location.module';
 import { GuessModule } from './modules/guess/guess.module';
 import { Guesses } from './entities/guesses.entity';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { Guesses } from './entities/guesses.entity';
     AuthModule,
     LocationModule,
     GuessModule,
+    UserModule,
   ],
   controllers: [AppController],
 })

@@ -1,15 +1,12 @@
 import {
-  BadRequestException,
   Injectable,
-  NotFoundException,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { JwtPayloadDto } from './dto/jwt-payload.dto';
-import { Users } from '../../entities/users.entity';
 import { UserRegisterDto } from './dto/user-register.dto';
 import { AuthRepository } from './auth.repository';
 import { UserLoginDto } from './dto/user-login.dto';
@@ -21,6 +18,7 @@ export class AuthService {
     private authRepository: AuthRepository,
     private jwtService: JwtService,
   ) {}
+  private logger = new Logger('AuthRepository');
 
   async register(userRegisterDto: UserRegisterDto): Promise<void> {
     return this.authRepository.register(userRegisterDto);
@@ -37,8 +35,14 @@ export class AuthService {
     if (user && (await bcrypt.compare(password, user.password))) {
       const payload: JwtPayloadDto = { email };
       const accessToken: string = this.jwtService.sign(payload);
+      this.logger.verbose(
+        `User with "${email}" email is logged in!`,
+      );
       return { accessToken };
     } else {
+      this.logger.verbose(
+        `User login creentials are incorrect!`,
+      );
       throw new UnauthorizedException('Please check your login creentials');
     }
   }
