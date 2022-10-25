@@ -1,12 +1,11 @@
 import { EnvVars } from './../../common/constants/env-vars.contant';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Module } from '@nestjs/common';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt/jwt.strategy';
-import { Users } from '../../entities/users.entity';
 import { PassportModule } from '@nestjs/passport';
 import { AuthRepository } from './auth.repository';
 

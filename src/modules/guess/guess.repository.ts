@@ -1,7 +1,7 @@
 import { EntityRepository, Repository } from 'typeorm';
 import { Users } from '../../entities/users.entity';
 import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
-import { Guesses } from 'src/entities/guesses.entity';
+import { Guesses } from '../../entities/guesses.entity';
 import { GuessDto } from './dto/guess.dto';
 
 @EntityRepository(Guesses)

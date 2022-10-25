@@ -6,10 +6,10 @@ import {
   Options,
 } from '@nestjs/common';
 import { Users } from '../../entities/users.entity';
+import { Guesses } from '../../entities/guesses.entity';
+import { Locations } from '../../entities/locations.entity';
 import { UserRegisterDto } from '../auth/dto/user-register.dto';
 import * as bcrypt from 'bcrypt';
-import { Guesses } from 'src/entities/guesses.entity';
-import { Locations } from 'src/entities/locations.entity';
 
 @EntityRepository(Users)
 export class UserRepository extends Repository<Users> {
@@ -78,7 +78,7 @@ export class UserRepository extends Repository<Users> {
     user: Users,
     userRegisterDto: UserRegisterDto,
   ): Promise<Users> {
-    const { email, password, passwordConfirm, name, surname } = userRegisterDto;
+    const { email, password, passwordConfirm, name, surname, profilePicture } = userRegisterDto;
     const newUser = await this.findOne(user.id);
     const found = await this.find({
       where: { email: email },
@@ -106,6 +106,7 @@ export class UserRepository extends Repository<Users> {
       newUser.password = hashedPassword;
       newUser.name = name;
       newUser.surname = surname;
+      newUser.profilePicture = profilePicture;
 
       await this.save(newUser);
       this.logger.verbose(

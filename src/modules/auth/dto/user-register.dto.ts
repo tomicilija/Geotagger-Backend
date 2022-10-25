@@ -4,7 +4,7 @@ import { IsEmail, IsNotEmpty, Matches, MinLength } from 'class-validator';
 export class UserRegisterDto {
   @ApiProperty({
     description: 'User e-mail adress',
-    example: 'ilija.tomic@gmail.com',
+    example: 'name.surname@gmail.com',
   })
   @IsNotEmpty()
   @IsEmail()
@@ -36,14 +36,14 @@ export class UserRegisterDto {
 
   @ApiProperty({
     description: 'First name',
-    example: 'Ilija',
+    example: 'Name',
   })
   @IsNotEmpty()
   name: string;
 
   @ApiProperty({
     description: 'Last/Family name',
-    example: 'Tomic',
+    example: 'Surname',
   })
   @IsNotEmpty()
   surname: string;
