@@ -29,19 +29,6 @@ describe('AppController (e2e)', () => {
     app = mod.createNestApplication();
     await app.init();
 
-    try {
-      const entities = [];
-      getConnection().entityMetadatas.forEach(x =>
-        entities.push({ name: x.name, tableName: x.tableName }),
-      );
-      for (const entity of entities) {
-        const repository = getRepository(entity.name);
-        await repository.query(`TRUNCATE TABLE "${entity.tableName}" cascade;`);
-      }
-    } catch (error) {
-      throw new Error(`ERROR: Cleaning test db: ${error}`);
-    }
-
     //Hash
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash('Test123!', salt);
@@ -58,9 +45,8 @@ describe('AppController (e2e)', () => {
     initialUserData = testUser;
   });
 
-  // after all tests are run we delete all tables in database.  TODO --> change to delete only entred values  OR  Separate environment
+  // after all tests are run we delete all tables in database.
   afterAll(async () => {
-    /*
     try {
       const entities = [];
       getConnection().entityMetadatas.forEach(x =>
@@ -72,7 +58,7 @@ describe('AppController (e2e)', () => {
       }
     } catch (error) {
       throw new Error(`ERROR: Cleaning test db: ${error}`);
-    }*/
+    }
     await app.close();
   });
 

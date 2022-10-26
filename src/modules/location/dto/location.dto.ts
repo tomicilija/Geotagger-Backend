@@ -4,7 +4,6 @@ import {
   IsLongitude,
   IsNotEmpty,
   IsString,
-  IsUrl,
 } from 'class-validator';
 
 export class LocationDto {
@@ -36,6 +35,5 @@ export class LocationDto {
     example: 'path/locationImage',
   })
   @IsNotEmpty()
-  //@IsUrl()
   image: string;
 }

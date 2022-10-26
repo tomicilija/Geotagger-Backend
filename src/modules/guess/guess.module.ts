@@ -4,7 +4,6 @@ import { AuthModule } from '../auth/auth.module';
 import { GuessRepository } from './guess.repository';
 import { GuessController} from './guess.controller';
 import { GuessService } from './guess.service';
-import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [

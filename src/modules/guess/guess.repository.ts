@@ -63,11 +63,11 @@ export class GuessRepository extends Repository<Guesses> {
       );
     }
 
-    const distance = await this.calculateDistance(
+    const distance = this.calculateDistance(
       location[0].latitude,
       location[0].longitude,
       latitude,
-      longitude,
+      longitude
     );
 
     const guess = new Guesses();

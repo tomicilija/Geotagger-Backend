@@ -1,10 +1,5 @@
 import { EntityRepository, Repository } from 'typeorm';
-import {
-  ConflictException,
-  Logger,
-  NotFoundException,
-  Options,
-} from '@nestjs/common';
+import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
 import { Users } from '../../entities/users.entity';
 import { Guesses } from '../../entities/guesses.entity';
 import { Locations } from '../../entities/locations.entity';
@@ -63,9 +58,7 @@ export class UserRepository extends Repository<Users> {
     );
     const result = await this.delete(user.id);
     if (result.affected == 0) {
-      this.logger.error(
-        `User with ID: "${user.id}" not fund!`,
-      );
+      this.logger.error(`User with ID: "${user.id}" not fund!`);
       throw new NotFoundException(`User with ID: "${user.id}" not fund!`);
     }
     this.logger.verbose(
@@ -78,24 +71,29 @@ export class UserRepository extends Repository<Users> {
     user: Users,
     userRegisterDto: UserRegisterDto,
   ): Promise<Users> {
-    const { email, password, passwordConfirm, name, surname, profilePicture } = userRegisterDto;
+    const {
+      email,
+      password,
+      passwordConfirm,
+      name,
+      surname,
+      profilePicture,
+    } = userRegisterDto;
     const newUser = await this.findOne(user.id);
     const found = await this.find({
       where: { email: email },
     });
 
     if (found[0]) {
-      this.logger.error(
-        `User wth "${email}" email already exists!`,
+      this.logger.error(`User wth "${email}" email already exists!`);
+      throw new ConflictException(
+        `User wth "${email}" email already exists! \n`,
       );
-      throw new ConflictException(`User wth "${email}" email already exists! \n`);
     }
 
     // Do passwords match?
     if (password !== passwordConfirm) {
-      this.logger.error(
-        `Passwords do not match!`,
-      );
+      this.logger.error(`Passwords do not match!`);
       throw new ConflictException('Passwords do not match!');
     } else {
       // Hash
@@ -109,9 +107,7 @@ export class UserRepository extends Repository<Users> {
       newUser.profilePicture = profilePicture;
 
       await this.save(newUser);
-      this.logger.verbose(
-        `User with ${email} email is updated!`,
-      );
+      this.logger.verbose(`User with ${email} email is updated!`);
     }
     return newUser;
   }
