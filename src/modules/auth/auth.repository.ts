@@ -25,7 +25,7 @@ export class AuthRepository extends Repository<Users> {
 
     // Do passwords match?
     if (password !== passwordConfirm) {
-      this.logger.verbose(
+      this.logger.error(
         `Passwords do not match!`,
       );
       throw new ConflictException('Passwords do not match!');
@@ -48,7 +48,7 @@ export class AuthRepository extends Repository<Users> {
       } catch (error) {
         //Catches Duplicate email with error code 23505
         if (error.code === '23505') {
-          this.logger.verbose(
+          this.logger.error(
             `User is already registerd with "${email}" email!`,
           );
           throw new ConflictException(

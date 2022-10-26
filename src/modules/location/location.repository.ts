@@ -47,7 +47,7 @@ export class LocationRepository extends Repository<Locations> {
       this.logger.error(`Location with ID: ${id} not found!`);
       throw new NotFoundException(`Location with ID: ${id} not found!`);
     }
-    this.logger.error(`Fetched location with ID: ${id} from the database!`);
+    this.logger.verbose(`Fetched location with ID: ${id} from the database!`);
     return location;
   }
 

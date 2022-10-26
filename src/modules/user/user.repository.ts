@@ -19,7 +19,7 @@ export class UserRepository extends Repository<Users> {
   async getLoggedInUser(user: Users): Promise<Users> {
     const found = await this.findOne(user.id);
     if (!found) {
-      this.logger.verbose(`User wth emil: "${user.email}" not found!`);
+      this.logger.error(`User wth emil: "${user.email}" not found!`);
       throw new NotFoundException(`User wth emil: "${user.email}" not found!`);
     }
     this.logger.verbose(
@@ -33,7 +33,7 @@ export class UserRepository extends Repository<Users> {
   async getUserById(user_id: string): Promise<Users> {
     const found = await this.findOne(user_id);
     if (!found) {
-      this.logger.verbose(`User wth ID: "${user_id}"" not found!`);
+      this.logger.error(`User wth ID: "${user_id}"" not found!`);
       throw new NotFoundException(`User wth ID: "${user_id}" not found`);
     }
     this.logger.verbose(
@@ -63,7 +63,7 @@ export class UserRepository extends Repository<Users> {
     );
     const result = await this.delete(user.id);
     if (result.affected == 0) {
-      this.logger.verbose(
+      this.logger.error(
         `User with ID: "${user.id}" not fund!`,
       );
       throw new NotFoundException(`User with ID: "${user.id}" not fund!`);
@@ -85,7 +85,7 @@ export class UserRepository extends Repository<Users> {
     });
 
     if (found[0]) {
-      this.logger.verbose(
+      this.logger.error(
         `User wth "${email}" email already exists!`,
       );
       throw new ConflictException(`User wth "${email}" email already exists! \n`);
@@ -93,7 +93,7 @@ export class UserRepository extends Repository<Users> {
 
     // Do passwords match?
     if (password !== passwordConfirm) {
-      this.logger.verbose(
+      this.logger.error(
         `Passwords do not match!`,
       );
       throw new ConflictException('Passwords do not match!');

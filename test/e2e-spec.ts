@@ -10,13 +10,15 @@ import { UserRegisterDto } from 'src/modules/auth/dto/user-register.dto';
 import { UserLoginDto } from 'src/modules/auth/dto/user-login.dto';
 import { LocationDto } from 'src/modules/location/dto/location.dto';
 import { Locations } from 'src/entities/locations.entity';
+import { GuessDto } from 'src/modules/guess/dto/guess.dto';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
   let mod: TestingModule;
   let userToken: string;
   let initialUserData: Users;
-  let locatonData: Locations;
+  let initialLocatonData: Locations;
+  let newLocatonData: Locations;
 
   // before we run tests we add user to database
   beforeAll(async () => {
@@ -401,7 +403,7 @@ describe('AppController (e2e)', () => {
           longitude: 15.131544,
           image: 'path/locationImage',
         });
-        locatonData = res.body;
+        initialLocatonData = res.body;
       });
   });
 
@@ -428,20 +430,20 @@ describe('AppController (e2e)', () => {
 
   it('/location/id (GET) --> get specific location - gets users new location', async () => {
     await request(app.getHttpServer())
-      .get(`/location/${locatonData.id}`)
+      .get(`/location/${initialLocatonData.id}`)
       .set({ Authorization: `Bearer ${userToken}` })
       .expect(200)
       .then(res => {
         expect(res.body).toEqual({
-            id: expect.any(String),
-            user_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
-            createdAt: expect.any(String),
-            updatedAt: expect.any(String),
-            name: 'Velenje',
-            latitude: '46.356637',
-            longitude: '15.131544',
-            image: 'path/locationImage',
-          });
+          id: expect.any(String),
+          user_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          name: 'Velenje',
+          latitude: '46.356637',
+          longitude: '15.131544',
+          image: 'path/locationImage',
+        });
       });
   });
 
@@ -453,7 +455,7 @@ describe('AppController (e2e)', () => {
       image: 'path/locationImageMaribor',
     };
     await request(app.getHttpServer())
-      .patch(`/location/${locatonData.id}`)
+      .patch(`/location/${initialLocatonData.id}`)
       .set({ Authorization: `Bearer ${userToken}` })
       .send(updateLocaton)
       .expect(200)
@@ -499,26 +501,26 @@ describe('AppController (e2e)', () => {
       .send(dto)
       .expect(201)
       .then(res => {
-        locatonData = res.body;
+        newLocatonData = res.body;
       });
   });
 
   it('/location/id (GET) --> get specific location - gets users last location', async () => {
     await request(app.getHttpServer())
-      .get(`/location/${locatonData.id}`)
+      .get(`/location/${newLocatonData.id}`)
       .set({ Authorization: `Bearer ${userToken}` })
       .expect(200)
       .then(res => {
         expect(res.body).toEqual({
-            id: expect.any(String),
-            user_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
-            createdAt: expect.any(String),
-            updatedAt: expect.any(String),
-            name: 'Ljubljana',
-            latitude: '46.051463',
-            longitude: '14.506068',
-            image: 'path/locationImage',
-          });
+          id: expect.any(String),
+          user_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          name: 'Ljubljana',
+          latitude: '46.051463',
+          longitude: '14.506068',
+          image: 'path/locationImage',
+        });
       });
   });
 
@@ -528,30 +530,105 @@ describe('AppController (e2e)', () => {
       .set({ Authorization: `Bearer ${userToken}` })
       .expect(200)
       .then(res => {
-        expect(res.body.name).toMatch(/^Ljubljana|Velenje|Maribor$/) // regex to match any of these values
-        expect(res.body.latitude).toMatch(/^46.051463|46.356637|46.562667$/) // regex to match any of these values
+        expect(res.body.name).toMatch(/^Ljubljana|Velenje|Maribor$/); // regex to match any of these values
+        expect(res.body.latitude).toMatch(/^46.051463|46.356637|46.562667$/); // regex to match any of these values
         expect(res.body.longitude).toMatch(/^14.506068|15.131544|15.640516$/); // regex to match any of these values
       });
   });
 
   it('/location/id (DELETE) --> delete location', async () => {
     await request(app.getHttpServer())
-      .delete(`/location/${locatonData.id}`)
+      .delete(`/location/${newLocatonData.id}`)
       .set({ Authorization: `Bearer ${userToken}` })
       .expect(200);
   });
 
   it('/location/id (GET) --> empty 404 not found - location deleted', async () => {
     await request(app.getHttpServer())
-      .get(`/location/${locatonData.id}`)
+      .get(`/location/${newLocatonData.id}`)
       .set({ Authorization: `Bearer ${userToken}` })
       .expect(404);
   });
 
   it('/location/id (DELETE) --> empty 404 not found - cant delete location that does not exist', async () => {
     await request(app.getHttpServer())
-      .delete(`/location/${locatonData.id}`)
+      .delete(`/location/${newLocatonData.id}`)
       .set({ Authorization: `Bearer ${userToken}` })
       .expect(404);
+  });
+
+  //   ------------ GUESS TESTS ------------ \\
+
+  it('/location/guess/id (POST)) --> 401 on validation error - no authentication', async () => {
+    const newGuess: GuessDto = {
+      latitude: 46.231578,
+      longitude: 15.264089,
+    };
+    await request(app.getHttpServer())
+      .post(`/location`)
+      .send(newGuess)
+      .expect(401);
+  });
+
+  it('/location/guess/id (POST) --> add new guess', async () => {
+    const newGuess: GuessDto = {
+      latitude: 46.231578,
+      longitude: 15.264089,
+    };
+    await request(app.getHttpServer())
+      .post(`/location/guess/${initialLocatonData.id}`)
+      .set({ Authorization: `Bearer ${userToken}` })
+      .send(newGuess)
+      .expect(201)
+      .then(res => {
+        expect(res.body).toEqual({
+          distance: 46783,
+          id: expect.any(String),
+          user_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
+          location_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        });
+      });
+  });
+
+  it('/location/guess/id (POST)--> 409 on conflict - guess for this location already exists', async () => {
+    const newGuess: GuessDto = {
+      latitude: 46.231578,
+      longitude: 15.264089,
+    };
+    await request(app.getHttpServer())
+      .post(`/location/guess/${initialLocatonData.id}`)
+      .set({ Authorization: `Bearer ${userToken}` })
+      .send(newGuess)
+      .expect(409);
+  });
+
+  it('/location/guesses/id (GET) --> 401 on validation error - no authentication', async () => {
+    await request(app.getHttpServer())
+      .get(`/location`)
+      .expect(401);
+  });
+
+  it('/location/guesses/id (GET) --> get all guesses in ascending order - gets guesses of selected location', async () => {
+    await request(app.getHttpServer())
+      .get(`/location/guesses/${initialLocatonData.id}`)
+      .set({ Authorization: `Bearer ${userToken}` })
+      .expect(200)
+      .then(res => {
+        expect(res.body).toEqual([
+          {
+            id: expect.any(String),
+            createdAt: expect.any(String),
+            distance: 46783,
+            user: {
+              id: expect.any(String),
+              name: 'Mock',
+              profilePicture: 'defaultPicture',
+              surname: 'User',
+            },
+          },
+        ]);
+      });
   });
 });
