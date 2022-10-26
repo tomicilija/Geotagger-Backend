@@ -18,6 +18,8 @@ import { LocationService } from './location.service';
 
 @ApiTags('Location')
 @Controller('location')
+@UseGuards(AuthGuard())
+@ApiBearerAuth()
 export class LocationController {
   constructor(private locationService: LocationService) {}
 
@@ -37,8 +39,6 @@ export class LocationController {
   }
 
   @Post()
-  @UseGuards(AuthGuard())
-  @ApiBearerAuth()
   async createLocation(
     @GetUser() user: Users,
     @Body() locationDto: LocationDto,
@@ -46,9 +46,7 @@ export class LocationController {
     return this.locationService.createLocation(user, locationDto);
   }
 
-  @Delete('/delete/:id')
-  @UseGuards(AuthGuard())
-  @ApiBearerAuth()
+  @Delete('/:id')
   async deleteLocation(
     @GetUser() user: Users,
     @Param('id') id: string,
@@ -56,9 +54,7 @@ export class LocationController {
     return this.locationService.deleteLocation(user, id);
   }
 
-  @Patch('/edit/:id')
-  @UseGuards(AuthGuard())
-  @ApiBearerAuth()
+  @Patch('/:id')
   async editLocation(
     @GetUser() user: Users,
     @Param('id') id: string,

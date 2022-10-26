@@ -9,6 +9,8 @@ import { GuessService } from './guess.service';
 
 @ApiTags('Guess')
 @Controller('location')
+@UseGuards(AuthGuard())
+@ApiBearerAuth()
 export class GuessController {
   constructor(private guessService: GuessService) {}
 
@@ -18,8 +20,6 @@ export class GuessController {
   }
 
   @Post('/guess/:id')
-  @UseGuards(AuthGuard())
-  @ApiBearerAuth()
   async guessLocation(
     @GetUser() user: Users,
     @Param('id') id: string,
