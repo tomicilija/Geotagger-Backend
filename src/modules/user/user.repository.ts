@@ -90,6 +90,7 @@ export class UserRepository extends Repository<Users> {
         `User wth "${email}" email already exists! \n`,
       );
     }
+    const tempPP = "testPath"; //  <- Remove line
 
     // Do passwords match?
     if (password !== passwordConfirm) {
@@ -104,7 +105,7 @@ export class UserRepository extends Repository<Users> {
       newUser.password = hashedPassword;
       newUser.name = name;
       newUser.surname = surname;
-      newUser.profilePicture = profilePicture;
+      newUser.profilePicture = tempPP;
 
       await this.save(newUser);
       this.logger.verbose(`User with ${email} email is updated!`);

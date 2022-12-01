@@ -13,21 +13,19 @@ export class AuthRepository extends Repository<Users> {
   private logger = new Logger('AuthRepository');
 
   // Creates user with email, pass, name, surname and profile picture
-  async register(userRegisterDto: UserRegisterDto): Promise<void> {
-    const {
-      email,
-      password,
-      passwordConfirm,
-      name,
-      surname,
-      profilePicture,
-    } = userRegisterDto;
+  async register(
+    userRegisterDto: UserRegisterDto,
+    file: Express.Multer.File,
+  ): Promise<void> {
+    const { email, password, passwordConfirm, name, surname } = userRegisterDto;
 
+    let profilePicturePath = 'DefaultAvatar';
+    if (file != undefined) {
+      profilePicturePath = file.filename;
+    }
     // Do passwords match?
     if (password !== passwordConfirm) {
-      this.logger.error(
-        `Passwords do not match!`,
-      );
+      this.logger.error(`Passwords do not match!`);
       throw new ConflictException('Passwords do not match!');
     } else {
       // Password Hash
@@ -38,19 +36,15 @@ export class AuthRepository extends Repository<Users> {
         password: hashedPassword,
         name,
         surname,
-        profilePicture,
+        profilePicture: profilePicturePath,
       });
       try {
         await this.save(user);
-        this.logger.verbose(
-          `User with ${email} email is saved in a database!`,
-        );
+        this.logger.verbose(`User with ${email} email is saved in a database!`);
       } catch (error) {
         //Catches Duplicate email with error code 23505
         if (error.code === '23505') {
-          this.logger.error(
-            `User is already registerd with "${email}" email!`,
-          );
+          this.logger.error(`User is already registerd with "${email}" email!`);
           throw new ConflictException(
             `User is already registerd with "${email}" email!`,
           );

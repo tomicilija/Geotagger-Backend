@@ -20,8 +20,8 @@ export class AuthService {
   ) {}
   private logger = new Logger('AuthRepository');
 
-  async register(userRegisterDto: UserRegisterDto): Promise<void> {
-    return this.authRepository.register(userRegisterDto);
+  async register(userRegisterDto: UserRegisterDto, file: Express.Multer.File): Promise<void> {
+    return this.authRepository.register(userRegisterDto, file);
   }
 
   async login(loginUserDto: UserLoginDto): Promise<{ accessToken: string }> {
