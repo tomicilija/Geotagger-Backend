@@ -51,7 +51,7 @@ export class UserRegisterDto {
   @ApiProperty({
     description: 'Path of a profile picture',
     example: 'DefaultAvatar',
-    default: 'DefaultAvatar'
+    type: 'file'
   })
   profilePicture: Express.Multer.File;
 }

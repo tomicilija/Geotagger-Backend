@@ -3,6 +3,7 @@ import {
   ConflictException,
   InternalServerErrorException,
   Logger,
+  PayloadTooLargeException,
 } from '@nestjs/common';
 import { Users } from '../../entities/users.entity';
 import { UserRegisterDto } from './dto/user-register.dto';
@@ -18,11 +19,9 @@ export class AuthRepository extends Repository<Users> {
     file: Express.Multer.File,
   ): Promise<void> {
     const { email, password, passwordConfirm, name, surname } = userRegisterDto;
+    
+    const profilePicturePath = 'DefaultAvatar';
 
-    let profilePicturePath = 'DefaultAvatar';
-    if (file != undefined) {
-      profilePicturePath = file.filename;
-    }
     // Do passwords match?
     if (password !== passwordConfirm) {
       this.logger.error(`Passwords do not match!`);
