@@ -19,9 +19,14 @@ export class AuthRepository extends Repository<Users> {
     file: Express.Multer.File,
   ): Promise<void> {
     const { email, password, passwordConfirm, name, surname } = userRegisterDto;
-    
-    const profilePicturePath = 'DefaultAvatar';
+    const fileSize = 5 * 1024 * 1024; // 5 MB
+    let profilePicturePath = 'DefaultAvatar';
 
+    if (file != undefined) {
+      if (file.size < fileSize) {
+        profilePicturePath = file.filename;
+      }
+    }
     // Do passwords match?
     if (password !== passwordConfirm) {
       this.logger.error(`Passwords do not match!`);

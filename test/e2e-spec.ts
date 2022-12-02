@@ -39,7 +39,7 @@ describe('AppController (e2e)', () => {
       password: hashedPassword,
       name: 'Test',
       surname: 'User',
-      profilePicture: 'path/defaultPicture',
+      profilePicture: 'DefaultAvatar',
     });
     await userRepo.save(testUser);
     initialUserData = testUser;
@@ -84,7 +84,7 @@ describe('AppController (e2e)', () => {
       passwordConfirm: 'Passw123',
       name: 'Mock',
       surname: 'User',
-      profilePicture: 'defaultPicture',
+      profilePicture: undefined
     };
     await request(app.getHttpServer())
       .post(`/register`)
@@ -99,7 +99,7 @@ describe('AppController (e2e)', () => {
       passwordConfirm: 'mock',
       name: 'Mock',
       surname: 'User',
-      profilePicture: 'defaultPicture',
+      profilePicture: undefined
     };
     await request(app.getHttpServer())
       .post(`/register`)
@@ -114,7 +114,7 @@ describe('AppController (e2e)', () => {
       passwordConfirm: 'Passw123',
       name: 'Mock',
       surname: 'User',
-      profilePicture: 'defaultPicture',
+      profilePicture: undefined
     };
     await request(app.getHttpServer())
       .post(`/register`)
@@ -129,7 +129,7 @@ describe('AppController (e2e)', () => {
       passwordConfirm: 'Passw123',
       name: 'Mock',
       surname: 'User',
-      profilePicture: 'defaultPicture',
+      profilePicture: undefined
     };
     await request(app.getHttpServer())
       .post('/register')
@@ -191,7 +191,7 @@ describe('AppController (e2e)', () => {
           password: expect.any(String),
           name: 'Mock',
           surname: 'User',
-          profilePicture: 'defaultPicture',
+          profilePicture: 'DefaultAvatar',
         });
       });
   });
@@ -210,7 +210,7 @@ describe('AppController (e2e)', () => {
           password: expect.any(String),
           name: 'Test',
           surname: 'User',
-          profilePicture: 'path/defaultPicture',
+          profilePicture: 'DefaultAvatar',
         });
       });
   });
@@ -222,7 +222,7 @@ describe('AppController (e2e)', () => {
       passwordConfirm: 'Passw123_updated',
       name: 'Mock_updated',
       surname: 'User_updated',
-      profilePicture: 'defaultPicture_updated',
+      profilePicture: undefined
     };
     await request(app.getHttpServer())
       .patch('/me/update-password')
@@ -239,7 +239,7 @@ describe('AppController (e2e)', () => {
           password: expect.any(String),
           name: 'Mock_updated',
           surname: 'User_updated',
-          profilePicture: 'defaultPicture_updated',
+          profilePicture: 'DefaultAvatar_updated',
         });
       });
   });
@@ -275,7 +275,7 @@ describe('AppController (e2e)', () => {
           password: expect.any(String),
           name: 'Mock_updated',
           surname: 'User_updated',
-          profilePicture: 'defaultPicture_updated',
+          profilePicture: 'DefaultAvatar_updated',
         });
       });
   });
@@ -303,7 +303,7 @@ describe('AppController (e2e)', () => {
       passwordConfirm: 'Passw123',
       name: 'Mock',
       surname: 'User',
-      profilePicture: 'defaultPicture',
+      profilePicture: undefined
     };
     await request(app.getHttpServer())
       .post(`/register`)
@@ -610,7 +610,7 @@ describe('AppController (e2e)', () => {
             user: {
               id: expect.any(String),
               name: 'Mock',
-              profilePicture: 'defaultPicture',
+              profilePicture: 'DefaultAvatar',
               surname: 'User',
             },
           },

@@ -11,7 +11,7 @@ import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserRegisterDto } from './dto/user-register.dto';
-import { profilePictureStorage } from 'src/common/storage/images.storage';
+import { profilePictureStorage } from '../../common/storage/images.storage';
 
 @ApiTags('Authentication')
 @Controller()

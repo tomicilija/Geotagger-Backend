@@ -79,6 +79,18 @@ export class UserRepository extends Repository<Users> {
       surname,
       profilePicture,
     } = userRegisterDto;
+    
+
+    const fileSize = 5 * 1024 * 1024; // 5 MB
+    const profilePicturePath = 'DefaultAvatar_updated';
+    /*
+    let profilePicturePath = 'DefaultAvatar';
+    if (file != undefined) {
+      if (file.size < fileSize) {
+        profilePicturePath = file.filename;
+      }
+    }
+*/
     const newUser = await this.findOne(user.id);
     const found = await this.find({
       where: { email: email },
@@ -90,7 +102,6 @@ export class UserRepository extends Repository<Users> {
         `User wth "${email}" email already exists! \n`,
       );
     }
-    const tempPP = "testPath"; //  <- Remove line
 
     // Do passwords match?
     if (password !== passwordConfirm) {
@@ -105,7 +116,7 @@ export class UserRepository extends Repository<Users> {
       newUser.password = hashedPassword;
       newUser.name = name;
       newUser.surname = surname;
-      newUser.profilePicture = tempPP;
+      newUser.profilePicture = profilePicturePath;
 
       await this.save(newUser);
       this.logger.verbose(`User with ${email} email is updated!`);
