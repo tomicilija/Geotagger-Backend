@@ -39,7 +39,7 @@ describe('AppController (e2e)', () => {
       password: hashedPassword,
       name: 'Test',
       surname: 'User',
-      profilePicture: 'DefaultAvatar',
+      profilePicture: 'DefaultAvatar.png',
     });
     await userRepo.save(testUser);
     initialUserData = testUser;
@@ -191,7 +191,7 @@ describe('AppController (e2e)', () => {
           password: expect.any(String),
           name: 'Mock',
           surname: 'User',
-          profilePicture: 'DefaultAvatar',
+          profilePicture: 'DefaultAvatar.png',
         });
       });
   });
@@ -210,7 +210,7 @@ describe('AppController (e2e)', () => {
           password: expect.any(String),
           name: 'Test',
           surname: 'User',
-          profilePicture: 'DefaultAvatar',
+          profilePicture: 'DefaultAvatar.png',
         });
       });
   });
@@ -239,7 +239,7 @@ describe('AppController (e2e)', () => {
           password: expect.any(String),
           name: 'Mock_updated',
           surname: 'User_updated',
-          profilePicture: 'DefaultAvatar_updated',
+          profilePicture: 'DefaultAvatar_updated.png',
         });
       });
   });
@@ -275,7 +275,7 @@ describe('AppController (e2e)', () => {
           password: expect.any(String),
           name: 'Mock_updated',
           surname: 'User_updated',
-          profilePicture: 'DefaultAvatar_updated',
+          profilePicture: 'DefaultAvatar_updated.png',
         });
       });
   });
@@ -610,7 +610,7 @@ describe('AppController (e2e)', () => {
             user: {
               id: expect.any(String),
               name: 'Mock',
-              profilePicture: 'DefaultAvatar',
+              profilePicture: 'DefaultAvatar.png',
               surname: 'User',
             },
           },

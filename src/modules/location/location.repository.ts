@@ -7,10 +7,41 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { join } from 'path';
 
 @EntityRepository(Locations)
 export class LocationRepository extends Repository<Locations> {
   private logger = new Logger('LocationRepository');
+
+  async createLocation(
+    user: Users,
+    locationDto: LocationDto,
+    file: Express.Multer.File,
+  ): Promise<Locations> {
+    const { name, latitude, longitude } = locationDto;
+    
+    const fileSize = 5 * 1024 * 1024; // 5 MB
+    let locationImagePath = 'locationImage.jpg';
+
+    if (file != undefined) {
+      if (file.size < fileSize) {
+        locationImagePath = file.filename;
+      }
+    }
+
+    const location = new Locations();
+    location.name = name;
+    location.latitude = latitude;
+    location.longitude = longitude;
+    location.image = locationImagePath;
+    location.user_id = user.id; // eslint-disable-line @typescript-eslint/camelcase
+
+    await this.save(location);
+    this.logger.verbose(
+      `User "${user.name} ${user.surname}" added a new location "${name}"!`,
+    );
+    return location;
+  }
 
   async getLocations(): Promise<Locations[]> {
     const getLocations = await this.find();
@@ -18,6 +49,18 @@ export class LocationRepository extends Repository<Locations> {
       `Fetched ${getLocations.length} locations from the database!`,
     );
     return getLocations;
+  }
+
+  async getUserProfilePicture(id: string, res) {
+    const location = await this.findOne(id);
+    if (!location) {
+      this.logger.error(`User wth ID: "${id}"" not found!`);
+      throw new NotFoundException(`User wth ID: "${id}" not found`);
+    }
+    const image = res.sendFile(
+      join(process.cwd(), 'uploads/locations/' + location.image),
+    );
+    return image;
   }
 
   async getRandomLocation(): Promise<Locations> {
@@ -48,25 +91,6 @@ export class LocationRepository extends Repository<Locations> {
     return location;
   }
 
-  async createLocation(
-    user: Users,
-    locationDto: LocationDto,
-  ): Promise<Locations> {
-    const { name, latitude, longitude, image } = locationDto;
-    const location = new Locations();
-    location.name = name;
-    location.latitude = latitude;
-    location.longitude = longitude;
-    location.image = image;
-    location.user_id = user.id; // eslint-disable-line @typescript-eslint/camelcase
-
-    await this.save(location);
-    this.logger.verbose(
-      `User "${user.name} ${user.surname}" added a new location "${name}"!`,
-    );
-    return location;
-  }
-
   async deleteLocation(user: Users, id: string): Promise<Locations> {
     const location = await this.findOne(id);
     if (!location) {
@@ -94,17 +118,18 @@ export class LocationRepository extends Repository<Locations> {
     id: string,
     locationDto: LocationDto,
   ): Promise<Locations> {
-    const { name, latitude, longitude, image } = locationDto;
+    const { name, latitude, longitude } = locationDto;
     const location = await this.findOne(id);
     if (!location) {
       this.logger.error(`Location with ID: ${id} not found!`);
       throw new NotFoundException(`Location with ID: ${id} not found!`);
     }
+    const locationImagePath = 'locationImage.jpgs';
     if (location.user_id === user.id) {
       location.name = name;
       location.latitude = latitude;
       location.longitude = longitude;
-      location.image = image;
+      location.image = locationImagePath;
       await this.save(location);
       this.logger.verbose(
         `User with email: ${user.email} successfully edited the location with id ${id}!`,

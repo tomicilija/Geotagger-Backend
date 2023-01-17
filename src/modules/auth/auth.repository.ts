@@ -20,7 +20,7 @@ export class AuthRepository extends Repository<Users> {
   ): Promise<void> {
     const { email, password, passwordConfirm, name, surname } = userRegisterDto;
     const fileSize = 5 * 1024 * 1024; // 5 MB
-    let profilePicturePath = 'DefaultAvatar';
+    let profilePicturePath = 'DefaultAvatar.png';
 
     if (file != undefined) {
       if (file.size < fileSize) {

@@ -11,7 +11,7 @@ import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserRegisterDto } from './dto/user-register.dto';
-import { profilePictureStorage } from '../../common/storage/images.storage';
+import { profileImagesStorage } from '../../common/storage/profile-images.storage';
 
 @ApiTags('Authentication')
 @Controller()
@@ -21,7 +21,7 @@ export class AuthController {
 
   @Post('/register')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('profilePicture', profilePictureStorage))
+  @UseInterceptors(FileInterceptor('profilePicture', profileImagesStorage))
   async register(
     @Body() userRegisterDto: UserRegisterDto,
     @UploadedFile() file: Express.Multer.File,

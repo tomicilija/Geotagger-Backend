@@ -1,18 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, Matches, MinLength } from 'class-validator';
+import { IsNotEmpty, Matches, MinLength } from 'class-validator';
 
-export class UserRegisterDto {
+export class UpdatePasswordDto {
   @ApiProperty({
-    description: 'User e-mail adress',
-    example: 'name.surname@gmail.com',
+    description: 'Current user password',
+    example: 'Passw123',
   })
   @IsNotEmpty()
-  @IsEmail()
-  email: string;
+  currentPassword: string;
 
   @ApiProperty({
-    description: 'User password',
-    example: 'Passw123',
+    description: 'New password',
+    example: 'Passw12345',
   })
   @IsNotEmpty()
   @MinLength(8, {
@@ -29,29 +28,8 @@ export class UserRegisterDto {
 
   @ApiProperty({
     description: 'Confirm user password',
-    example: 'Passw123',
+    example: 'Passw12345',
   })
   @IsNotEmpty()
   passwordConfirm: string;
-
-  @ApiProperty({
-    description: 'First name',
-    example: 'Name',
-  })
-  @IsNotEmpty()
-  name: string;
-
-  @ApiProperty({
-    description: 'Last/Family name',
-    example: 'Surname',
-  })
-  @IsNotEmpty()
-  surname: string;
-
-  @ApiProperty({
-    description: 'Path of a profile picture',
-    example: 'DefaultAvatar.png',
-    type: 'file'
-  })
-  profilePicture: Express.Multer.File;
 }

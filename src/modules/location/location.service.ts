@@ -12,8 +12,20 @@ export class LocationService {
     private locationRepository: LocationRepository,
   ) {}
 
+  async createLocation(
+    user: Users,
+    locationDto: LocationDto,
+    file: Express.Multer.File,
+  ): Promise<Locations> {
+    return this.locationRepository.createLocation(user, locationDto, file);
+  }
+
   async getLocations(): Promise<Locations[]> {
     return this.locationRepository.getLocations();
+  }
+
+  async getUserProfilePicture(id: string, res) {
+    return this.locationRepository.getUserProfilePicture(id, res);
   }
 
   async getRandomLocation(): Promise<Locations> {
@@ -22,12 +34,6 @@ export class LocationService {
 
   async getLocationById(id: string): Promise<Locations> {
     return this.locationRepository.getLocationById(id);
-  }
-  async createLocation(
-    user: Users,
-    locationDto: LocationDto,
-  ): Promise<Locations> {
-    return this.locationRepository.createLocation(user, locationDto);
   }
 
   async deleteLocation(user: Users, id: string): Promise<Locations> {

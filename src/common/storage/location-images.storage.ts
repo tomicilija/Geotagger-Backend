@@ -25,9 +25,9 @@ const filter = (req, file, cb) => {
   }
 };
 
-export const profilePictureStorage = {
+export const locationImagesStorage = {
   storage: diskStorage({
-    destination: './uploads/profile-pictures',
+    destination: './uploads/locations',
     filename: editFileName,
   }),
   fileFilter: filter,

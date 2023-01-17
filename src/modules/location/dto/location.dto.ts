@@ -31,9 +31,9 @@ export class LocationDto {
   longitude: number;
 
   @ApiProperty({
-    description: 'Path to image that shows location for users to guess',
-    example: 'path/locationImage',
+    description: 'Path pf location image',
+    example: 'locationImage.jpg',
+    type: 'file'
   })
-  @IsNotEmpty()
-  image: string;
+  image: Express.Multer.File;
 }
