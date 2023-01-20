@@ -1,5 +1,10 @@
 import { EntityRepository, Repository } from 'typeorm';
-import { ConflictException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Users } from '../../entities/users.entity';
 import { Guesses } from '../../entities/guesses.entity';
 import { Locations } from '../../entities/locations.entity';
@@ -7,6 +12,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcrypt';
 import { join } from 'path';
+import { isUUID } from 'validator';
 
 @EntityRepository(Users)
 export class UserRepository extends Repository<Users> {
@@ -28,19 +34,20 @@ export class UserRepository extends Repository<Users> {
   /* eslint-disable @typescript-eslint/camelcase*/
   // Gets user profile picture
   async getUserProfilePicture(user_id: string, res) {
-    const found = await this.findOne(user_id);
-    if (!found) {
-      this.logger.error(`User wth ID: "${user_id}"" not found!`);
-      throw new NotFoundException(`User wth ID: "${user_id}" not found`);
-    }
-    const profilePictures = res.sendFile(
-      join(process.cwd(), 'uploads/profile-pictures/' + found.profilePicture),
-    );
-    return profilePictures;
+      const found = await this.findOne(user_id);
+      if (!found) {
+        this.logger.error(`User wth ID: "${user_id}"" not found!`);
+        throw new NotFoundException(`User wth ID: "${user_id}" not found`);
+      }
+      const profilePictures = res.sendFile(
+        join(process.cwd(), 'uploads/profile-pictures/' + found.profilePicture),
+      );
+      return profilePictures;
   }
 
   // Gets all of the users information with this specific id
   async getUserById(user_id: string): Promise<Users> {
+    if (isUUID(user_id)) {
     const found = await this.findOne(user_id);
     if (!found) {
       this.logger.error(`User wth ID: "${user_id}"" not found!`);
@@ -50,6 +57,7 @@ export class UserRepository extends Repository<Users> {
       `Fetched user "${found.name} ${found.surname}" from the database!`,
     );
     return found;
+  }
   }
   /* eslint-enable @typescript-eslint/camelcase*/
 
@@ -137,7 +145,7 @@ export class UserRepository extends Repository<Users> {
     user: Users,
     updatePasswordDto: UpdatePasswordDto,
   ): Promise<Users> {
-    const {currentPassword, password, passwordConfirm } = updatePasswordDto;
+    const { currentPassword, password, passwordConfirm } = updatePasswordDto;
 
     const newUser = await this.findOne(user.id);
     if (user && (await bcrypt.compare(currentPassword, user.password))) {

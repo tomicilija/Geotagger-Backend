@@ -14,9 +14,14 @@ import { GuessService } from './guess.service';
 export class GuessController {
   constructor(private guessService: GuessService) {}
 
-  @Get('/guesses/:id')
-  async getGuesses(@Param('id') id: string): Promise<Guesses[]> {
-    return this.guessService.getGuesses(id);
+  @Get('/guesses/me')
+  async getMyGuesses(@GetUser() user: Users): Promise<Guesses[]> {
+    return this.guessService.getMyGuesses(user);
+  }
+
+  @Get('/guess/:id')
+  async getGuessById(@Param('id') id: string): Promise<Guesses[]> {
+    return this.guessService.getGuessById(id);
   }
 
   @Post('/guess/:id')

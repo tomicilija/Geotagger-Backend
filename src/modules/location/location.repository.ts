@@ -19,7 +19,7 @@ export class LocationRepository extends Repository<Locations> {
     file: Express.Multer.File,
   ): Promise<Locations> {
     const { name, latitude, longitude } = locationDto;
-    
+
     const fileSize = 5 * 1024 * 1024; // 5 MB
     let locationImagePath = 'locationImage.jpg';
 
@@ -51,11 +51,19 @@ export class LocationRepository extends Repository<Locations> {
     return getLocations;
   }
 
-  async getUserProfilePicture(id: string, res) {
+  async getMyLocations(user: Users): Promise<Locations[]> {
+    const getLocations = await this.find({ where: { user_id: user.id } }); // eslint-disable-line @typescript-eslint/camelcase
+    this.logger.verbose(
+      `Fetched ${getLocations.length} locations from the database!`,
+    );
+    return getLocations;
+  }
+
+  async getLocationImage(id: string, res) {
     const location = await this.findOne(id);
     if (!location) {
-      this.logger.error(`User wth ID: "${id}"" not found!`);
-      throw new NotFoundException(`User wth ID: "${id}" not found`);
+      this.logger.error(`Location wth ID: "${id}"" not found!`);
+      throw new NotFoundException(`Location wth ID: "${id}" not found`);
     }
     const image = res.sendFile(
       join(process.cwd(), 'uploads/locations/' + location.image),
@@ -98,6 +106,9 @@ export class LocationRepository extends Repository<Locations> {
       throw new NotFoundException(`Location with ID: ${id} not found!`);
     }
     if (location.user_id === user.id) {
+      await this.query('DELETE FROM guesses WHERE location_id = $1', [
+        location.id,
+      ]);
       await this.remove(location);
       this.logger.verbose(
         `User with email: ${user.email} has successfully deleted location with id: ${id}!`,
@@ -105,10 +116,10 @@ export class LocationRepository extends Repository<Locations> {
       return location;
     } else {
       this.logger.error(
-        `User with email: ${user.email} does not have permission to delete their location!`,
+        `User with email: ${user.email} does not have permission to delete this location!`,
       );
       throw new UnauthorizedException(
-        `User with email: ${user.email} does not have permission to delete their location!`,
+        `User with email: ${user.email} does not have permission to delete this location!`,
       );
     }
   }

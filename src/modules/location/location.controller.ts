@@ -44,10 +44,16 @@ export class LocationController {
     return this.locationService.getLocations();
   }
 
+  // Gets all locations of signed in user
+  @Get('/me')
+  async getMyLocations(@GetUser() user: Users): Promise<Locations[]> {
+    return this.locationService.getMyLocations(user);
+  }
+
   // Gets location image
   @Get('/image/:id')
-  getUserProfilePicture(@Param('id') id: string, @Res() res){
-    return this.locationService.getUserProfilePicture(id, res);
+  getLocationImage(@Param('id') id: string, @Res() res) {
+    return this.locationService.getLocationImage(id, res);
   }
 
   @Get('/random')

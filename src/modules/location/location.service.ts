@@ -24,8 +24,12 @@ export class LocationService {
     return this.locationRepository.getLocations();
   }
 
-  async getUserProfilePicture(id: string, res) {
-    return this.locationRepository.getUserProfilePicture(id, res);
+  async getMyLocations(user: Users): Promise<Locations[]> {
+    return this.locationRepository.getMyLocations(user);
+  }
+
+  async getLocationImage(id: string, res) {
+    return this.locationRepository.getLocationImage(id, res);
   }
 
   async getRandomLocation(): Promise<Locations> {

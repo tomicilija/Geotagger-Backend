@@ -8,7 +8,17 @@ import { GuessDto } from './dto/guess.dto';
 export class GuessRepository extends Repository<Guesses> {
   private logger = new Logger('GuessRepository');
 
-  async getGuesses(id: string): Promise<Guesses[]> {
+  async getMyGuesses(user: Users): Promise<Guesses[]> {
+    const getMyGuesses = await this.find({ where: { user_id: user.id } }); // eslint-disable-line @typescript-eslint/camelcase
+    
+    this.logger.verbose(
+      `Fetched ${getMyGuesses.length} guesses of user: ${user.email} from the database!`,
+    );
+    
+    return getMyGuesses;
+  }
+
+  async getGuessById(id: string): Promise<Guesses[]> {
     const getGuesses = await this.createQueryBuilder()
       .select([
         'guess.id',
@@ -45,6 +55,7 @@ export class GuessRepository extends Repository<Guesses> {
       this.logger.error(`Location with ID: ${id} not found!`);
       throw new NotFoundException(`Location with ID: ${id} not found!`);
     }
+
     const checkGuess = await this.findOne({
       where: {
         /* eslint-disable @typescript-eslint/camelcase*/
@@ -53,21 +64,21 @@ export class GuessRepository extends Repository<Guesses> {
         /* eslint-enable @typescript-eslint/camelcase*/
       },
     });
-
+/*
     if (checkGuess) {
       this.logger.verbose(
-        `User "${user.name} ${user.surname}" already submitet guess for this locaton`,
+        `User "${user.name} ${user.surname}" already submited guess for this locaton`,
       );
       throw new ConflictException(
-        `User "${user.name} ${user.surname}" already submitet guess for this locaton`,
+        `User "${user.name} ${user.surname}" already submited guess for this locaton`,
       );
-    }
+    }*/
 
     const distance = this.calculateDistance(
       location[0].latitude,
       location[0].longitude,
       latitude,
-      longitude
+      longitude,
     );
 
     const guess = new Guesses();
@@ -78,7 +89,7 @@ export class GuessRepository extends Repository<Guesses> {
     /* eslint-enable @typescript-eslint/camelcase*/
     await this.save(guess);
     this.logger.verbose(
-      `User "${user.name} ${user.surname}" added a new location "${location[0].name}" guess!`,
+      `User "${user.name} ${user.surname}" added a new "${location[0].name}" guess! With error distance: "${distance}" m`,
     );
     return guess;
   }
