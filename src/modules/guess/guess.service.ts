@@ -11,8 +11,8 @@ export class GuessService {
     @InjectRepository(GuessRepository)
     private guessRepository: GuessRepository,
   ) {}
-  async getMyGuesses(user: Users): Promise<Guesses[]> {
-    return this.guessRepository.getMyGuesses(user);
+  async getMyGuesses(user: Users, page: number, size: number): Promise<Guesses[]> {
+    return this.guessRepository.getMyGuesses(user, page, size);
   }
 
   async getGuessById(id: string): Promise<Guesses[]> {

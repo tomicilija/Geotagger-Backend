@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Res,
   UploadedFile,
   UseGuards,
@@ -40,14 +41,21 @@ export class LocationController {
   }
 
   @Get()
-  async getLocations(): Promise<Locations[]> {
-    return this.locationService.getLocations();
+  async getLocations(
+    @Query('page') page = 1,
+    @Query('size') size = 3,
+  ): Promise<Locations[]> {
+    return this.locationService.getLocations(page, size);
   }
 
   // Gets all locations of signed in user
   @Get('/me')
-  async getMyLocations(@GetUser() user: Users): Promise<Locations[]> {
-    return this.locationService.getMyLocations(user);
+  async getMyLocations(
+    @GetUser() user: Users,
+    @Query('page') page = 1,
+    @Query('size') size = 3,
+  ): Promise<Locations[]> {
+    return this.locationService.getMyLocations(user, page, size);
   }
 
   // Gets location image
@@ -75,11 +83,14 @@ export class LocationController {
   }
 
   @Patch('/:id')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image', locationImagesStorage))
   async editLocation(
     @GetUser() user: Users,
     @Param('id') id: string,
     @Body() locationDto: LocationDto,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<Locations> {
-    return this.locationService.editLocation(user, id, locationDto);
+    return this.locationService.editLocation(user, id, locationDto, file);
   }
 }

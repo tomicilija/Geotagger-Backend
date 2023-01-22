@@ -8,13 +8,22 @@ import { GuessDto } from './dto/guess.dto';
 export class GuessRepository extends Repository<Guesses> {
   private logger = new Logger('GuessRepository');
 
-  async getMyGuesses(user: Users): Promise<Guesses[]> {
-    const getMyGuesses = await this.find({ where: { user_id: user.id } }); // eslint-disable-line @typescript-eslint/camelcase
-    
+  async getMyGuesses(
+    user: Users,
+    page: number,
+    size: number,
+  ): Promise<Guesses[]> {
+    const id = user.id;
+    const getMyGuesses = await this.createQueryBuilder()
+      .where('user_id = :id', { id })
+      .take(size)
+      .orderBy('distance', 'ASC')
+      .getMany();
+
     this.logger.verbose(
       `Fetched ${getMyGuesses.length} guesses of user: ${user.email} from the database!`,
     );
-    
+
     return getMyGuesses;
   }
 
@@ -32,6 +41,7 @@ export class GuessRepository extends Repository<Guesses> {
       .from(Guesses, 'guess')
       .leftJoin('guess.user', 'user')
       .where('guess.location_id = :id', { id })
+      .take(14)
       .orderBy('guess.distance', 'ASC')
       .getMany();
 
@@ -64,7 +74,7 @@ export class GuessRepository extends Repository<Guesses> {
         /* eslint-enable @typescript-eslint/camelcase*/
       },
     });
-/*
+    /*
     if (checkGuess) {
       this.logger.verbose(
         `User "${user.name} ${user.surname}" already submited guess for this locaton`,

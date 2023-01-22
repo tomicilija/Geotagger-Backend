@@ -43,16 +43,31 @@ export class LocationRepository extends Repository<Locations> {
     return location;
   }
 
-  async getLocations(): Promise<Locations[]> {
-    const getLocations = await this.find();
+  async getLocations(page: number, size: number): Promise<Locations[]> {
+    const getLocations = await this.find({
+      order: {
+        createdAt: 'DESC',
+      },
+      take: size,
+    });
     this.logger.verbose(
       `Fetched ${getLocations.length} locations from the database!`,
     );
+
     return getLocations;
   }
 
-  async getMyLocations(user: Users): Promise<Locations[]> {
-    const getLocations = await this.find({ where: { user_id: user.id } }); // eslint-disable-line @typescript-eslint/camelcase
+  async getMyLocations(
+    user: Users,
+    page: number,
+    size: number,
+  ): Promise<Locations[]> {
+    const id = user.id;
+    const getLocations = await this.createQueryBuilder()
+      .where('user_id = :id', { id })
+      .take(size)
+      .getMany();
+
     this.logger.verbose(
       `Fetched ${getLocations.length} locations from the database!`,
     );
@@ -128,14 +143,25 @@ export class LocationRepository extends Repository<Locations> {
     user: Users,
     id: string,
     locationDto: LocationDto,
+    file: Express.Multer.File,
   ): Promise<Locations> {
+    console.log('1');
     const { name, latitude, longitude } = locationDto;
     const location = await this.findOne(id);
     if (!location) {
       this.logger.error(`Location with ID: ${id} not found!`);
       throw new NotFoundException(`Location with ID: ${id} not found!`);
     }
-    const locationImagePath = 'locationImage.jpgs';
+
+    const fileSize = 5 * 1024 * 1024; // 5 MB
+    let locationImagePath = 'locationImage.jpg';
+
+    if (file != undefined) {
+      if (file.size < fileSize) {
+        locationImagePath = file.filename;
+      }
+    }
+
     if (location.user_id === user.id) {
       location.name = name;
       location.latitude = latitude;

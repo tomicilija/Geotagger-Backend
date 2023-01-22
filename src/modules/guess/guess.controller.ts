@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Guesses } from '../../entities/guesses.entity';
@@ -15,8 +23,12 @@ export class GuessController {
   constructor(private guessService: GuessService) {}
 
   @Get('/guesses/me')
-  async getMyGuesses(@GetUser() user: Users): Promise<Guesses[]> {
-    return this.guessService.getMyGuesses(user);
+  async getMyGuesses(
+    @GetUser() user: Users,
+    @Query('page') page = 1,
+    @Query('size') size = 3,
+  ): Promise<Guesses[]> {
+    return this.guessService.getMyGuesses(user, page, size);
   }
 
   @Get('/guess/:id')

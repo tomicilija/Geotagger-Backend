@@ -20,12 +20,12 @@ export class LocationService {
     return this.locationRepository.createLocation(user, locationDto, file);
   }
 
-  async getLocations(): Promise<Locations[]> {
-    return this.locationRepository.getLocations();
+  async getLocations(page: number, size: number): Promise<Locations[]> {
+    return this.locationRepository.getLocations(page, size);
   }
 
-  async getMyLocations(user: Users): Promise<Locations[]> {
-    return this.locationRepository.getMyLocations(user);
+  async getMyLocations(user: Users, page: number, size: number): Promise<Locations[]> {
+    return this.locationRepository.getMyLocations(user, page, size);
   }
 
   async getLocationImage(id: string, res) {
@@ -48,7 +48,8 @@ export class LocationService {
     user: Users,
     id: string,
     locationDto: LocationDto,
+    file: Express.Multer.File,
   ): Promise<Locations> {
-    return this.locationRepository.editLocation(user, id, locationDto);
+    return this.locationRepository.editLocation(user, id, locationDto, file);
   }
 }
