@@ -13,6 +13,11 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcrypt';
 import { join } from 'path';
 import { isUUID } from 'validator';
+import { v4 as uuid } from 'uuid';
+import * as nodemailer from 'nodemailer';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { EnvVars } from 'src/common/constants/env-vars.contant';
+import { ForgotPasswordDto } from './dto/forgot-password.dto copy';
 
 @EntityRepository(Users)
 export class UserRepository extends Repository<Users> {
@@ -34,30 +39,30 @@ export class UserRepository extends Repository<Users> {
   /* eslint-disable @typescript-eslint/camelcase*/
   // Gets user profile picture
   async getUserProfilePicture(user_id: string, res) {
-      const found = await this.findOne(user_id);
-      if (!found) {
-        this.logger.error(`User wth ID: "${user_id}"" not found!`);
-        throw new NotFoundException(`User wth ID: "${user_id}" not found`);
-      }
-      const profilePictures = res.sendFile(
-        join(process.cwd(), 'uploads/profile-pictures/' + found.profilePicture),
-      );
-      return profilePictures;
-  }
-
-  // Gets all of the users information with this specific id
-  async getUserById(user_id: string): Promise<Users> {
-    if (isUUID(user_id)) {
     const found = await this.findOne(user_id);
     if (!found) {
       this.logger.error(`User wth ID: "${user_id}"" not found!`);
       throw new NotFoundException(`User wth ID: "${user_id}" not found`);
     }
-    this.logger.verbose(
-      `Fetched user "${found.name} ${found.surname}" from the database!`,
+    const profilePictures = res.sendFile(
+      join(process.cwd(), 'uploads/profile-pictures/' + found.profilePicture),
     );
-    return found;
+    return profilePictures;
   }
+
+  // Gets all of the users information with this specific id
+  async getUserById(user_id: string): Promise<Users> {
+    if (isUUID(user_id)) {
+      const found = await this.findOne(user_id);
+      if (!found) {
+        this.logger.error(`User wth ID: "${user_id}"" not found!`);
+        throw new NotFoundException(`User wth ID: "${user_id}" not found`);
+      }
+      this.logger.verbose(
+        `Fetched user "${found.name} ${found.surname}" from the database!`,
+      );
+      return found;
+    }
   }
   /* eslint-enable @typescript-eslint/camelcase*/
 
@@ -170,6 +175,83 @@ export class UserRepository extends Repository<Users> {
     } else {
       this.logger.verbose(`Current password is  incorrect!`);
       throw new UnauthorizedException('Current password is incorrect!');
+    }
+  }
+
+  async generateResetToken(forgotPasswordDto: ForgotPasswordDto): Promise<string> {
+    const email = forgotPasswordDto.email
+    const user = await this.findOne({email});
+    if (!user) {
+      this.logger.error(`User with email: "${email}" not fund!`);
+      throw new NotFoundException(`User with email: "${email}" not fund!`);
+    }
+    const resetToken = uuid();
+    user.resetToken = resetToken;
+    user.resetTokenExpiration = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+    await this.save(user);
+    return resetToken;
+  }
+
+  private transporter = nodemailer.createTransport({
+    host: 'smtp.mailtrap.io',
+    port: 2525,
+    auth: {
+      user: process.env.MAILTRAPIO_USER,
+      pass: process.env.MAILTRAPIO_PASSWORD,
+    },
+  });
+
+  async sendResetEmail(forgotPasswordDto: ForgotPasswordDto, resetToken: string): Promise<void> {
+    const email = forgotPasswordDto.email
+    const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
+    const message = {
+      from: 'reset-password@geotagger.com',
+      to: email,
+      subject: 'Reset your Geotagger password',
+      text: `Click the link to reset your password: ${resetLink}`,
+      html: `<p>Click the link to reset your password: <a href="${resetLink}">${resetLink}</a></p>`,
+    };
+    await this.transporter.sendMail(message, (error, info) => {
+      if (error) {
+        this.logger.error(error);
+        throw new Error(error);
+      } else {
+        this.logger.verbose(`Email sent: ${info.response}`);
+        return true;
+      }
+    });
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<boolean> {
+    const email = resetPasswordDto.email;
+    const user = await this.findOne({ email });
+    if (
+      !user ||
+      user.resetToken !== resetPasswordDto.token ||
+      !user.resetTokenExpiration ||
+      user.resetTokenExpiration < new Date()
+    ) {
+      return false;
+    } else {
+      if (resetPasswordDto.password !== resetPasswordDto.passwordConfirm) {
+        this.logger.error(`Passwords do not match!`);
+        throw new ConflictException('Passwords do not match!');
+      } else {
+        // Hash
+        const salt = await bcrypt.genSalt();
+        const hashedPassword = await bcrypt.hash(
+          resetPasswordDto.password,
+          salt,
+        );
+
+        user.password = hashedPassword;
+
+        user.resetToken = null;
+        user.resetTokenExpiration = null;
+        await this.save(user);
+        this.logger.verbose(`User password has been reseted!`);
+      }
+      return true;
     }
   }
 }

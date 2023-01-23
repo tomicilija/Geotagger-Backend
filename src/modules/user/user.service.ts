@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from '../../entities/users.entity';
+import { ForgotPasswordDto } from './dto/forgot-password.dto copy';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRepository } from './user.repository';
@@ -20,12 +22,12 @@ export class UserService {
   }
 
   // Gets user profile picture
-  async getUserProfilePicture(user_id: string, res){// eslint-disable-line @typescript-eslint/camelcase
+  async getUserProfilePicture(user_id: string, res) {// eslint-disable-line @typescript-eslint/camelcase    
     return this.userRepoitory.getUserProfilePicture(user_id, res);
   }
 
-  // Gets all information of loggend in user 
-  async getUserById(user_id: string): Promise<Users> {// eslint-disable-line @typescript-eslint/camelcase
+  // Gets all information of loggend in user
+  async getUserById(user_id: string): Promise<Users> {// eslint-disable-line @typescript-eslint/camelcase    
     return this.userRepoitory.getUserById(user_id);
   }
   // Delete logged in user
@@ -44,7 +46,22 @@ export class UserService {
   }
 
   // Updates password of loggend in user
-  updatePassword(user: Users, updatePasswordDto: UpdatePasswordDto): Promise<Users> {
+  updatePassword(
+    user: Users,
+    updatePasswordDto: UpdatePasswordDto,
+  ): Promise<Users> {
     return this.userRepoitory.updatePassword(user, updatePasswordDto);
+  }
+
+  generateResetToken(forgotPasswordDto: ForgotPasswordDto): Promise<string> {
+    return this.userRepoitory.generateResetToken(forgotPasswordDto);
+  }
+
+  sendResetEmail(forgotPasswordDto: ForgotPasswordDto, resetToken: string): Promise<void> {
+    return this.userRepoitory.sendResetEmail(forgotPasswordDto, resetToken);
+  }
+
+  resetPassword(reserPasswordDto: ResetPasswordDto): Promise<boolean> {
+    return this.userRepoitory.resetPassword(reserPasswordDto);
   }
 }

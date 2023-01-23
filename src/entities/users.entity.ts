@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, CreateDateColumn } from 'typeorm';
 import { Locations } from './locations.entity';
 import { Guesses } from './guesses.entity';
 import { CustomBaseEntity } from './base.entity';
@@ -20,15 +20,21 @@ export class Users extends CustomBaseEntity {
   @Column()
   profilePicture: string;
 
+  @Column({ nullable: true })
+  resetToken: string;
+
+  @CreateDateColumn({type: 'timestamptz', nullable: true }) // Date_time with timezone
+  resetTokenExpiration: Date;
+
   @OneToMany(
     () => Locations,
-    (locations) => locations.user_id,
+    locations => locations.user_id,
   )
   locations: Locations[];
 
   @OneToMany(
     () => Guesses,
-    (guesses) => guesses.user_id,
+    guesses => guesses.user_id,
   )
   guesses: Guesses[];
 }
