@@ -6,13 +6,17 @@ export class UserLoginDto {
     description: 'User e-mail adress',
     example: 'ilija.tomic@gmail.com',
   })
-  @IsNotEmpty()
+  @IsNotEmpty({
+    message: 'Email should not be empty\n',
+  })
   email: string;
 
   @ApiProperty({
     description: 'User password',
     example: 'Passw123',
   })
-  @IsNotEmpty()
+  @IsNotEmpty({
+    message: 'Password should not be empty\n',
+  })
   password: string;
 }

@@ -74,7 +74,6 @@ export class GuessRepository extends Repository<Guesses> {
         /* eslint-enable @typescript-eslint/camelcase*/
       },
     });
-    /*
     if (checkGuess) {
       this.logger.verbose(
         `User "${user.name} ${user.surname}" already submited guess for this locaton`,
@@ -82,7 +81,7 @@ export class GuessRepository extends Repository<Guesses> {
       throw new ConflictException(
         `User "${user.name} ${user.surname}" already submited guess for this locaton`,
       );
-    }*/
+    }
 
     const distance = this.calculateDistance(
       location[0].latitude,

@@ -1,5 +1,6 @@
 import { EntityRepository, Repository } from 'typeorm';
 import {
+  BadRequestException,
   ConflictException,
   Logger,
   NotFoundException,
@@ -178,9 +179,11 @@ export class UserRepository extends Repository<Users> {
     }
   }
 
-  async generateResetToken(forgotPasswordDto: ForgotPasswordDto): Promise<string> {
-    const email = forgotPasswordDto.email
-    const user = await this.findOne({email});
+  async generateResetToken(
+    forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<string> {
+    const email = forgotPasswordDto.email;
+    const user = await this.findOne({ email });
     if (!user) {
       this.logger.error(`User with email: "${email}" not fund!`);
       throw new NotFoundException(`User with email: "${email}" not fund!`);
@@ -201,8 +204,11 @@ export class UserRepository extends Repository<Users> {
     },
   });
 
-  async sendResetEmail(forgotPasswordDto: ForgotPasswordDto, resetToken: string): Promise<void> {
-    const email = forgotPasswordDto.email
+  async sendResetEmail(
+    forgotPasswordDto: ForgotPasswordDto,
+    resetToken: string,
+  ): Promise<void> {
+    const email = forgotPasswordDto.email;
     const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
     const message = {
       from: 'reset-password@geotagger.com',
@@ -225,13 +231,26 @@ export class UserRepository extends Repository<Users> {
   async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<boolean> {
     const email = resetPasswordDto.email;
     const user = await this.findOne({ email });
-    if (
-      !user ||
-      user.resetToken !== resetPasswordDto.token ||
-      !user.resetTokenExpiration ||
-      user.resetTokenExpiration < new Date()
-    ) {
-      return false;
+    if (!user) {
+      this.logger.error(`User with email: "${email}" not fund!`);
+      throw new NotFoundException(`User with email: "${email}" not fund!`);
+    } else if (user.resetToken !== resetPasswordDto.token) {
+      this.logger.error(`Url does not match email adress!`);
+      throw new BadRequestException(`Url does not match email adress!`);
+    } else if (!user.resetTokenExpiration) {
+      this.logger.error(
+        `Url is no longer valid, send new request for password reset!`,
+      );
+      throw new BadRequestException(
+        `Url is no longer valid, send new request for password reset!`,
+      );
+    } else if (user.resetTokenExpiration < new Date()) {
+      this.logger.error(
+        `Url is no longer valid, send new request for password reset!`,
+      );
+      throw new BadRequestException(
+        `Url is no longer valid, send new request for password reset!`,
+      );
     } else {
       if (resetPasswordDto.password !== resetPasswordDto.passwordConfirm) {
         this.logger.error(`Passwords do not match!`);
