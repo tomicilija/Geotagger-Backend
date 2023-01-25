@@ -22,7 +22,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto copy';
 
 @EntityRepository(Users)
 export class UserRepository extends Repository<Users> {
-  private logger = new Logger('LocationRepository');
+  private logger = new Logger('UserRepository');
 
   // Gets all of the users information with this specific id
   async getLoggedInUser(user: Users): Promise<Users> {
@@ -32,7 +32,7 @@ export class UserRepository extends Repository<Users> {
       throw new NotFoundException(`User wth emil: "${user.email}" not found!`);
     }
     this.logger.verbose(
-      `Fetched user "${found.name} ${found.surname}" from the database!`,
+      `Fetched logged in user "${found.name} ${found.surname}" from the database!`,
     );
     return found;
   }
@@ -60,7 +60,7 @@ export class UserRepository extends Repository<Users> {
         throw new NotFoundException(`User wth ID: "${user_id}" not found`);
       }
       this.logger.verbose(
-        `Fetched user "${found.name} ${found.surname}" from the database!`,
+        `Fetched user "${found.name} ${found.surname}" by id from the database!`,
       );
       return found;
     }

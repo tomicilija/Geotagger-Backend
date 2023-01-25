@@ -125,3 +125,7 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Uploaded iamges
+uploads/profile-pictures/**/*
+uploads/locations/**/*

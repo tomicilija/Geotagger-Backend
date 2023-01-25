@@ -32,8 +32,8 @@ export class LocationService {
     return this.locationRepository.getLocationImage(id, res);
   }
 
-  async getRandomLocation(): Promise<Locations> {
-    return this.locationRepository.getRandomLocation();
+  async getRandomLocationsId(): Promise<Locations[]> {
+    return this.locationRepository.getRandomLocationsId();
   }
 
   async getLocationById(id: string): Promise<Locations> {

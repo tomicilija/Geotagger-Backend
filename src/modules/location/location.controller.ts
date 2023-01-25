@@ -22,14 +22,14 @@ import { GetUser } from '../user/get-user.decorator';
 import { LocationDto } from './dto/location.dto';
 import { LocationService } from './location.service';
 
-@UseGuards(AuthGuard())
-@ApiBearerAuth()
 @ApiTags('Location')
 @Controller('location')
 export class LocationController {
   constructor(private locationService: LocationService) {}
 
   @Post()
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image', locationImagesStorage))
   async createLocation(
@@ -41,6 +41,8 @@ export class LocationController {
   }
 
   @Get()
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   async getLocations(
     @Query('page') page = 1,
     @Query('size') size = 3,
@@ -50,6 +52,8 @@ export class LocationController {
 
   // Gets all locations of signed in user
   @Get('/me')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   async getMyLocations(
     @GetUser() user: Users,
     @Query('page') page = 1,
@@ -65,16 +69,20 @@ export class LocationController {
   }
 
   @Get('/random')
-  async getRandomLocation(): Promise<Locations> {
-    return this.locationService.getRandomLocation();
+  async getRandomLocationsId(): Promise<Locations[]> {
+    return this.locationService.getRandomLocationsId();
   }
 
   @Get('/:id')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   async getLocationById(@Param('id') id: string): Promise<Locations> {
     return this.locationService.getLocationById(id);
   }
 
   @Delete('/:id')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   async deleteLocation(
     @GetUser() user: Users,
     @Param('id') id: string,
@@ -83,6 +91,8 @@ export class LocationController {
   }
 
   @Patch('/:id')
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image', locationImagesStorage))
   async editLocation(

@@ -86,21 +86,17 @@ export class LocationRepository extends Repository<Locations> {
     return image;
   }
 
-  async getRandomLocation(): Promise<Locations> {
+  async getRandomLocationsId(): Promise<Locations[]> {
     const getRandomLocation = this.createQueryBuilder()
       .select([
         'location.id',
-        'location.name',
-        'location.latitude',
-        'location.longitude',
-        'location.image',
       ])
       .from(Locations, 'location')
       .orderBy('RANDOM()')
-      .limit(1)
-      .getOne();
+      .limit(3)
+      .getMany();
 
-    this.logger.verbose(`Fetched random location from the database!`);
+    this.logger.verbose(`Fetched random locations from the database!`);
     return getRandomLocation;
   }
 
