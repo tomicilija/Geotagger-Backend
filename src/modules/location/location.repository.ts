@@ -35,7 +35,7 @@ export class LocationRepository extends Repository<Locations> {
     location.latitude = latitude;
     location.longitude = longitude;
     location.image = locationImagePath;
-    location.user_id = user.id; // eslint-disable-line @typescript-eslint/camelcase
+    location.user_id = user.id;
 
     await this.save(location);
     this.logger.verbose(

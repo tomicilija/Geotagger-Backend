@@ -19,7 +19,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './get-user.decorator';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { profileImagesStorage } from 'src/common/storage/profile-images.storage';
+import { profileImagesStorage } from '../../common/storage/profile-images.storage';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto copy';
 
@@ -41,7 +41,7 @@ export class UserController {
   @Get('/profilepicture/:id')
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
-  getUserProfilePicture(@Param('id') user_id: string, @Res() res) {// eslint-disable-line @typescript-eslint/camelcase
+  getUserProfilePicture(@Param('id') user_id: string, @Res() res) {
     return this.userService.getUserProfilePicture(user_id, res);
   }
 
@@ -49,7 +49,7 @@ export class UserController {
   @Get('/:id')
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
-  getUserById(@Param('id') user_id: string): Promise<Users> {// eslint-disable-line @typescript-eslint/camelcase
+  getUserById(@Param('id') user_id: string): Promise<Users> {
     return this.userService.getUserById(user_id);
   }
 

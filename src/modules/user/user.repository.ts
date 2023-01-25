@@ -36,7 +36,6 @@ export class UserRepository extends Repository<Users> {
     return found;
   }
 
-  /* eslint-disable @typescript-eslint/camelcase*/
   // Gets user profile picture
   async getUserProfilePicture(user_id: string, res) {
     const found = await this.findOne(user_id);
@@ -64,7 +63,6 @@ export class UserRepository extends Repository<Users> {
       return found;
     }
   }
-  /* eslint-enable @typescript-eslint/camelcase*/
 
   // Delete user with id
   async deleteUser(user: Users): Promise<void> {

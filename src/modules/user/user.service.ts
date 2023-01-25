@@ -22,12 +22,12 @@ export class UserService {
   }
 
   // Gets user profile picture
-  async getUserProfilePicture(user_id: string, res) {// eslint-disable-line @typescript-eslint/camelcase    
+  async getUserProfilePicture(user_id: string, res) {
     return this.userRepoitory.getUserProfilePicture(user_id, res);
   }
 
   // Gets all information of loggend in user
-  async getUserById(user_id: string): Promise<Users> {// eslint-disable-line @typescript-eslint/camelcase    
+  async getUserById(user_id: string): Promise<Users> {
     return this.userRepoitory.getUserById(user_id);
   }
   // Delete logged in user

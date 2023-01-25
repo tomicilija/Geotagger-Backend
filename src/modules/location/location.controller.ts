@@ -15,7 +15,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { locationImagesStorage } from 'src/common/storage/location-images.storage';
+import { locationImagesStorage } from '../../common/storage/location-images.storage';
 import { Locations } from '../../entities/locations.entity';
 import { Users } from '../../entities/users.entity';
 import { GetUser } from '../user/get-user.decorator';

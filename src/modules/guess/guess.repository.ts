@@ -1,9 +1,9 @@
 import { EntityRepository, Repository } from 'typeorm';
-import { Users } from '../../entities/users.entity';
 import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
+import { Users } from '../../entities/users.entity';
 import { Guesses } from '../../entities/guesses.entity';
+import { Locations } from '../../entities/locations.entity';
 import { GuessDto } from './dto/guess.dto';
-import { Locations } from 'src/entities/locations.entity';
 
 @EntityRepository(Guesses)
 export class GuessRepository extends Repository<Guesses> {
@@ -20,11 +20,6 @@ export class GuessRepository extends Repository<Guesses> {
       .take(size)
       .orderBy('distance', 'ASC')
       .getMany();
-
-    this.logger.log(
-      `Fetched ${getMyGuesses.length} guesses of user: ${user.email} from the database!`,
-    );
-
     return getMyGuesses;
   }
 
@@ -45,10 +40,6 @@ export class GuessRepository extends Repository<Guesses> {
       .take(14)
       .orderBy('guess.distance', 'ASC')
       .getMany();
-
-    this.logger.log(
-      `Fetched ${getGuesses.length} guesses for location: ${id} from the database!`,
-    );
     return getGuesses;
   }
 

@@ -6,24 +6,51 @@ import { AppModule } from '../src/app.module';
 import { Users } from '../src/entities/users.entity';
 import { AuthModule } from '../src/modules/auth/auth.module';
 import { getConnection, getRepository } from 'typeorm';
-import { UserRegisterDto } from 'src/modules/auth/dto/user-register.dto';
-import { UserLoginDto } from 'src/modules/auth/dto/user-login.dto';
-import { LocationDto } from 'src/modules/location/dto/location.dto';
-import { Locations } from 'src/entities/locations.entity';
-import { GuessDto } from 'src/modules/guess/dto/guess.dto';
+import { UserRegisterDto } from '../src/modules/auth/dto/user-register.dto';
+import { UserLoginDto } from '../src/modules/auth/dto/user-login.dto';
+import { LocationDto } from '../src/modules/location/dto/location.dto';
+import { Locations } from '../src/entities/locations.entity';
+import { GuessDto } from '../src/modules/guess/dto/guess.dto';
+import { UpdatePasswordDto } from '../src/modules/user/dto/update-password.dto';
+import { GuessModule } from '../src/modules/guess/guess.module';
+import { UserModule } from '../src/modules/user/user.module';
+import { LocationModule } from '../src/modules/location/location.module';
+import { Guesses } from '../src/entities/guesses.entity';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
   let mod: TestingModule;
   let userToken: string;
   let initialUserData: Users;
+  let mockUserData: Users;
   let initialLocatonData: Locations;
   let newLocatonData: Locations;
+  let guessLocatonData: Locations;
+
+  const fs = require('fs');
+  const profilePictureFilepath = 'uploads/profile-pictures/DefaultAvatar.png';
+
+  const fileData = fs.readFileSync(
+    profilePictureFilepath,
+    'utf8',
+    (err, data) => {
+      if (err) throw err;
+      console.log(data);
+    },
+  );
+  const fileUpdatedData = fs.readFileSync(
+    profilePictureFilepath,
+    'utf8',
+    (err, data) => {
+      if (err) throw err;
+      console.log(data);
+    },
+  );
 
   // before we run tests we add user to database
   beforeAll(async () => {
     mod = await Test.createTestingModule({
-      imports: [AppModule, AuthModule],
+      imports: [AppModule, AuthModule, LocationModule, GuessModule, UserModule],
     }).compile();
 
     app = mod.createNestApplication();
@@ -43,6 +70,26 @@ describe('AppController (e2e)', () => {
     });
     await userRepo.save(testUser);
     initialUserData = testUser;
+
+    const locationRepo = getRepository(Locations);
+    const testLocation = locationRepo.create({
+      name: 'Test addres road 23c, New York, USA',
+      latitude: 40.786514,
+      longitude: -73.962234,
+      image: 'Test.jpg',
+      user_id: initialUserData.id,
+    });
+    await locationRepo.save(testLocation);
+    initialLocatonData = testLocation;
+
+    const guessRepo = getRepository(Guesses);
+    const testUserGuess = guessRepo.create({
+      distance: 1,
+      user_id: initialUserData.id,
+      location_id: initialLocatonData.id,
+    });
+    await guessRepo.save(testUserGuess);
+
   });
 
   // after all tests are run we delete all tables in database.
@@ -63,7 +110,7 @@ describe('AppController (e2e)', () => {
   });
 
   //   ------------ USER TESTS ------------ \\
-
+  
   it('/me (GET) --> empty 401 on validation error - acces user without authentication', async () => {
     await request(app.getHttpServer())
       .get(`/me`)
@@ -84,7 +131,7 @@ describe('AppController (e2e)', () => {
       passwordConfirm: 'Passw123',
       name: 'Mock',
       surname: 'User',
-      profilePicture: undefined
+      profilePicture: undefined,
     };
     await request(app.getHttpServer())
       .post(`/register`)
@@ -99,7 +146,7 @@ describe('AppController (e2e)', () => {
       passwordConfirm: 'mock',
       name: 'Mock',
       surname: 'User',
-      profilePicture: undefined
+      profilePicture: undefined,
     };
     await request(app.getHttpServer())
       .post(`/register`)
@@ -114,7 +161,7 @@ describe('AppController (e2e)', () => {
       passwordConfirm: 'Passw123',
       name: 'Mock',
       surname: 'User',
-      profilePicture: undefined
+      profilePicture: undefined,
     };
     await request(app.getHttpServer())
       .post(`/register`)
@@ -129,7 +176,7 @@ describe('AppController (e2e)', () => {
       passwordConfirm: 'Passw123',
       name: 'Mock',
       surname: 'User',
-      profilePicture: undefined
+      profilePicture: undefined,
     };
     await request(app.getHttpServer())
       .post('/register')
@@ -159,7 +206,7 @@ describe('AppController (e2e)', () => {
       .send(userCredentals)
       .expect(401);
   });
-
+ 
   it('/login (POST) --> should return accessToken', async () => {
     const userCredentals: UserLoginDto = {
       email: 'mock.user@gmail.com',
@@ -192,7 +239,10 @@ describe('AppController (e2e)', () => {
           name: 'Mock',
           surname: 'User',
           profilePicture: 'DefaultAvatar.png',
+          resetToken: null,
+          resetTokenExpiration: expect.any(String),
         });
+        mockUserData = res.body;
       });
   });
 
@@ -203,7 +253,7 @@ describe('AppController (e2e)', () => {
       .expect(200)
       .then(res => {
         expect(res.body).toEqual({
-          id: expect.any(String),
+          id: initialUserData.id,
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
           email: 'test@gmail.com',
@@ -211,18 +261,17 @@ describe('AppController (e2e)', () => {
           name: 'Test',
           surname: 'User',
           profilePicture: 'DefaultAvatar.png',
+          resetToken: null,
+          resetTokenExpiration: expect.any(String),
         });
       });
   });
 
   it('/me/update-password (PATCH) --> updates logged in user', async () => {
-    const updateUser: UserRegisterDto = {
-      email: 'mock.user_updated@gmail.com',
+    const updateUser: UpdatePasswordDto = {
+      currentPassword: 'Passw123',
       password: 'Passw123_updated',
       passwordConfirm: 'Passw123_updated',
-      name: 'Mock_updated',
-      surname: 'User_updated',
-      profilePicture: undefined
     };
     await request(app.getHttpServer())
       .patch('/me/update-password')
@@ -232,21 +281,23 @@ describe('AppController (e2e)', () => {
       .expect(200)
       .then(res => {
         expect(res.body).toEqual({
-          id: expect.any(String),
+          id: mockUserData.id,
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
-          email: 'mock.user_updated@gmail.com',
+          email: 'mock.user@gmail.com',
           password: expect.any(String),
-          name: 'Mock_updated',
-          surname: 'User_updated',
-          profilePicture: 'DefaultAvatar_updated.png',
+          name: 'Mock',
+          surname: 'User',
+          profilePicture: 'DefaultAvatar.png',
+          resetToken: null,
+          resetTokenExpiration: expect.any(String),
         });
       });
   });
 
   it('/login (POST) --> login as updated user - should return new accessToken', async () => {
     const userCredentals: UserLoginDto = {
-      email: 'mock.user_updated@gmail.com',
+      email: 'mock.user@gmail.com',
       password: 'Passw123_updated',
     };
     await request(app.getHttpServer())
@@ -271,11 +322,13 @@ describe('AppController (e2e)', () => {
           id: expect.any(String),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
-          email: 'mock.user_updated@gmail.com',
+          email: 'mock.user@gmail.com',
           password: expect.any(String),
-          name: 'Mock_updated',
-          surname: 'User_updated',
-          profilePicture: 'DefaultAvatar_updated.png',
+          name: 'Mock',
+          surname: 'User',
+          profilePicture: 'DefaultAvatar.png',
+          resetToken: null,
+          resetTokenExpiration: expect.any(String),
         });
       });
   });
@@ -303,7 +356,7 @@ describe('AppController (e2e)', () => {
       passwordConfirm: 'Passw123',
       name: 'Mock',
       surname: 'User',
-      profilePicture: undefined
+      profilePicture: undefined,
     };
     await request(app.getHttpServer())
       .post(`/register`)
@@ -333,7 +386,7 @@ describe('AppController (e2e)', () => {
       name: 'Velenje',
       latitude: 46.356637,
       longitude: 15.131544,
-      image: 'path/locationImage',
+      image: fileData,
     };
     await request(app.getHttpServer())
       .post(`/location`)
@@ -352,7 +405,7 @@ describe('AppController (e2e)', () => {
       name: 'Maribor',
       latitude: 46.562667,
       longitude: 15.640516,
-      image: 'path/locationImage',
+      image: fileData,
     };
     await request(app.getHttpServer())
       .patch(`/location/id`)
@@ -371,7 +424,7 @@ describe('AppController (e2e)', () => {
       name: 'Velenje',
       latitude: 46.356637,
       longitude: 15.131544,
-      image: 'path/locationImage',
+      image: fileData,
     };
     await request(app.getHttpServer())
       .post(`/location`)
@@ -381,13 +434,13 @@ describe('AppController (e2e)', () => {
       .then(res => {
         expect(res.body).toEqual({
           id: expect.any(String),
-          user_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
+          user_id: expect.any(String),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
           name: 'Velenje',
           latitude: 46.356637,
           longitude: 15.131544,
-          image: 'path/locationImage',
+          image: expect.any(String),
         });
         initialLocatonData = res.body;
       });
@@ -402,13 +455,23 @@ describe('AppController (e2e)', () => {
         expect(res.body).toEqual([
           {
             id: expect.any(String),
-            user_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
+            user_id: expect.any(String), 
             createdAt: expect.any(String),
             updatedAt: expect.any(String),
             name: 'Velenje',
             latitude: '46.356637',
             longitude: '15.131544',
-            image: 'path/locationImage',
+            image: expect.any(String),
+          },
+          {
+            id: expect.any(String),
+            user_id: expect.any(String), 
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+            name: 'Test addres road 23c, New York, USA',
+            latitude: '40.786514',
+            longitude: '-73.962234',
+            image: expect.any(String),
           },
         ]);
       });
@@ -422,13 +485,13 @@ describe('AppController (e2e)', () => {
       .then(res => {
         expect(res.body).toEqual({
           id: expect.any(String),
-          user_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
+          user_id: expect.any(String), 
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
           name: 'Velenje',
           latitude: '46.356637',
           longitude: '15.131544',
-          image: 'path/locationImage',
+          image: expect.any(String),
         });
       });
   });
@@ -438,7 +501,7 @@ describe('AppController (e2e)', () => {
       name: 'Maribor',
       latitude: 46.562667,
       longitude: 15.640516,
-      image: 'path/locationImageMaribor',
+      image: fileUpdatedData,
     };
     await request(app.getHttpServer())
       .patch(`/location/${initialLocatonData.id}`)
@@ -448,13 +511,13 @@ describe('AppController (e2e)', () => {
       .then(res => {
         expect(res.body).toEqual({
           id: expect.any(String),
-          user_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
+          user_id: expect.any(String), 
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
           name: 'Maribor',
           latitude: 46.562667,
           longitude: 15.640516,
-          image: 'path/locationImageMaribor',
+          image: expect.any(String),
         });
       });
   });
@@ -465,7 +528,7 @@ describe('AppController (e2e)', () => {
       name: 'Velenje',
       latitude: 46.356637,
       longitude: 15.131544,
-      image: 'path/locationImage',
+      image: fileData,
     };
     await request(app.getHttpServer())
       .post(`/location`)
@@ -479,7 +542,7 @@ describe('AppController (e2e)', () => {
       name: 'Ljubljana',
       latitude: 46.051463,
       longitude: 14.506068,
-      image: 'path/locationImage',
+      image: fileData,
     };
     await request(app.getHttpServer())
       .post(`/location`)
@@ -499,13 +562,13 @@ describe('AppController (e2e)', () => {
       .then(res => {
         expect(res.body).toEqual({
           id: expect.any(String),
-          user_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
+          user_id: expect.any(String),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
           name: 'Ljubljana',
           latitude: '46.051463',
           longitude: '14.506068',
-          image: 'path/locationImage',
+          image: expect.any(String),
         });
       });
   });
@@ -516,9 +579,11 @@ describe('AppController (e2e)', () => {
       .set({ Authorization: `Bearer ${userToken}` })
       .expect(200)
       .then(res => {
-        expect(res.body.name).toMatch(/^Ljubljana|Velenje|Maribor$/); // regex to match any of these values
-        expect(res.body.latitude).toMatch(/^46.051463|46.356637|46.562667$/); // regex to match any of these values
-        expect(res.body.longitude).toMatch(/^14.506068|15.131544|15.640516$/); // regex to match any of these values
+        expect(res.body).toEqual([
+          { id: expect.any(String) },
+          { id: expect.any(String) },
+          { id: expect.any(String) },
+        ]);
       });
   });
 
@@ -545,37 +610,64 @@ describe('AppController (e2e)', () => {
 
   //   ------------ GUESS TESTS ------------ \\
 
-  it('/location/guess/id (POST)) --> 401 on validation error - no authentication', async () => {
-    const newGuess: GuessDto = {
-      latitude: 46.231578,
-      longitude: 15.264089,
+  it('/location (POST) --> add new location', async () => {
+    const dto: LocationDto = {
+      name: 'Velenje',
+      latitude: 46.356637,
+      longitude: 15.131544,
+      image: fileData,
     };
     await request(app.getHttpServer())
       .post(`/location`)
-      .send(newGuess)
-      .expect(401);
+      .set({ Authorization: `Bearer ${userToken}` })
+      .send(dto)
+      .expect(201)
+      .then(res => {
+        expect(res.body).toEqual({
+          id: expect.any(String),
+          user_id: expect.any(String), 
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          name: 'Velenje',
+          latitude: 46.356637,
+          longitude: 15.131544,
+          image: expect.any(String),
+        });
+        guessLocatonData = res.body;
+      });
   });
-
-  it('/location/guess/id (POST) --> add new guess', async () => {
+  
+  it('/location/guess/id (POST) --> 401 on validation error - no authentication', async () => {
     const newGuess: GuessDto = {
       latitude: 46.231578,
       longitude: 15.264089,
     };
     await request(app.getHttpServer())
-      .post(`/location/guess/${initialLocatonData.id}`)
-      .set({ Authorization: `Bearer ${userToken}` })
+      .post(`/location/guess/${guessLocatonData.id}`)
       .send(newGuess)
-      .expect(201)
-      .then(res => {
-        expect(res.body).toEqual({
-          distance: 46783,
-          id: expect.any(String),
-          user_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
-          location_id: expect.any(String), // eslint-disable-line @typescript-eslint/camelcase
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
+      .expect(401);
+  });
+  
+  it('/location/guess/id (POST) --> add new guess', async () => {
+      const newGuess: GuessDto = {
+        latitude: 46.231578,
+        longitude: 15.264089,
+      };
+      await request(app.getHttpServer())
+        .post(`/location/guess/${guessLocatonData.id}`)
+        .set({ Authorization: `Bearer ${userToken}` })
+        .send(newGuess)
+        .expect(201)
+        .then(res => {
+          expect(res.body).toEqual({
+            distance: 17235,
+            id: expect.any(String),
+            user_id: expect.any(String), 
+            location_id: expect.any(String),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+          });
         });
-      });
   });
 
   it('/location/guess/id (POST)--> 409 on conflict - guess for this location already exists', async () => {
@@ -584,21 +676,21 @@ describe('AppController (e2e)', () => {
       longitude: 15.264089,
     };
     await request(app.getHttpServer())
-      .post(`/location/guess/${initialLocatonData.id}`)
+      .post(`/location/guess/${guessLocatonData.id}`)
       .set({ Authorization: `Bearer ${userToken}` })
       .send(newGuess)
       .expect(409);
   });
 
-  it('/location/guesses/id (GET) --> 401 on validation error - no authentication', async () => {
+  it('/location/guess/id (GET) --> 401 on validation error - no authentication', async () => {
     await request(app.getHttpServer())
       .get(`/location`)
       .expect(401);
   });
 
-  it('/location/guesses/id (GET) --> get all guesses in ascending order - gets guesses of selected location', async () => {
+  it('/location/guess/id (GET) --> get all guesses in ascending order - gets guesses of selected location', async () => {
     await request(app.getHttpServer())
-      .get(`/location/guesses/${initialLocatonData.id}`)
+      .get(`/location/guess/${guessLocatonData.id}`)
       .set({ Authorization: `Bearer ${userToken}` })
       .expect(200)
       .then(res => {
@@ -606,13 +698,32 @@ describe('AppController (e2e)', () => {
           {
             id: expect.any(String),
             createdAt: expect.any(String),
-            distance: 46783,
+            distance: 17235,
             user: {
               id: expect.any(String),
               name: 'Mock',
               profilePicture: 'DefaultAvatar.png',
               surname: 'User',
             },
+          },
+        ]);
+      });
+  });
+
+  it('/location/guess/me (GET) --> get my guesses', async () => {
+    await request(app.getHttpServer())
+      .get(`/location/guesses/me`)
+      .set({ Authorization: `Bearer ${userToken}` })
+      .expect(200)
+      .then(res => {
+        expect(res.body).toEqual([
+          {
+            id: expect.any(String),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+            distance: 17235,
+            user_id: expect.any(String),
+            location_id: expect.any(String),
           },
         ]);
       });
