@@ -18,7 +18,7 @@ export class ResetPasswordDto {
   token: string;
 
   @ApiProperty({
-    description: 'New password',
+    description: 'New user password',
     example: 'Passw12345',
   })
   @IsNotEmpty()
@@ -35,7 +35,7 @@ export class ResetPasswordDto {
   password: string;
 
   @ApiProperty({
-    description: 'Confirm user password',
+    description: 'Confirm New user password',
     example: 'Passw12345',
   })
   @IsNotEmpty()

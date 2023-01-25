@@ -3,6 +3,7 @@ import { Users } from '../../entities/users.entity';
 import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
 import { Guesses } from '../../entities/guesses.entity';
 import { GuessDto } from './dto/guess.dto';
+import { Locations } from 'src/entities/locations.entity';
 
 @EntityRepository(Guesses)
 export class GuessRepository extends Repository<Guesses> {
@@ -20,7 +21,7 @@ export class GuessRepository extends Repository<Guesses> {
       .orderBy('distance', 'ASC')
       .getMany();
 
-    this.logger.verbose(
+    this.logger.log(
       `Fetched ${getMyGuesses.length} guesses of user: ${user.email} from the database!`,
     );
 
@@ -45,7 +46,7 @@ export class GuessRepository extends Repository<Guesses> {
       .orderBy('guess.distance', 'ASC')
       .getMany();
 
-    this.logger.verbose(
+    this.logger.log(
       `Fetched ${getGuesses.length} guesses for location: ${id} from the database!`,
     );
     return getGuesses;
@@ -57,9 +58,16 @@ export class GuessRepository extends Repository<Guesses> {
     guessnDto: GuessDto,
   ): Promise<Guesses> {
     const { latitude, longitude } = guessnDto;
-    const location = await this.query('SELECT * FROM locations WHERE id = $1', [
-      id,
-    ]);
+    const location = await this.createQueryBuilder()
+      .select([
+        'location.id',
+        'location.latitude',
+        'location.longitude',
+        'location.name',
+      ])
+      .from(Locations, 'location')
+      .where('location.id = :id', { id })
+      .getOne();
 
     if (!location) {
       this.logger.error(`Location with ID: ${id} not found!`);
@@ -68,37 +76,33 @@ export class GuessRepository extends Repository<Guesses> {
 
     const checkGuess = await this.findOne({
       where: {
-        /* eslint-disable @typescript-eslint/camelcase*/
         location_id: id,
         user_id: user.id,
-        /* eslint-enable @typescript-eslint/camelcase*/
       },
     });
     if (checkGuess) {
-      this.logger.verbose(
-        `User "${user.name} ${user.surname}" already submited guess for this locaton`,
+      this.logger.error(
+        `User with email ${user.email} already submitted a guess for this location`,
       );
       throw new ConflictException(
-        `User "${user.name} ${user.surname}" already submited guess for this locaton`,
+        `User with email ${user.email} already submitted a guess for this location`,
       );
     }
 
     const distance = this.calculateDistance(
-      location[0].latitude,
-      location[0].longitude,
+      location.latitude,
+      location.longitude,
       latitude,
       longitude,
     );
 
     const guess = new Guesses();
     guess.distance = distance;
-    /* eslint-disable @typescript-eslint/camelcase*/
     guess.user_id = user.id;
-    guess.location_id = location[0].id;
-    /* eslint-enable @typescript-eslint/camelcase*/
+    guess.location_id = location.id;
     await this.save(guess);
-    this.logger.verbose(
-      `User "${user.name} ${user.surname}" added a new "${location[0].name}" guess! With error distance: "${distance}" m`,
+    this.logger.log(
+      `User with email ${user.email} added a new "${location.name}" guess! With error distance: "${distance}" m`,
     );
     return guess;
   }

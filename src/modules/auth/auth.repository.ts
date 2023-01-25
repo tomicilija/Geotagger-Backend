@@ -3,11 +3,13 @@ import {
   ConflictException,
   InternalServerErrorException,
   Logger,
-  PayloadTooLargeException,
 } from '@nestjs/common';
 import { Users } from '../../entities/users.entity';
 import { UserRegisterDto } from './dto/user-register.dto';
 import * as bcrypt from 'bcrypt';
+
+const DEFAULT_AVATAR = 'DefaultAvatar.png';
+const FILE_SIZE_LIMIT = 5 * 1024 * 1024; // 5 MB
 
 @EntityRepository(Users)
 export class AuthRepository extends Repository<Users> {
@@ -19,11 +21,10 @@ export class AuthRepository extends Repository<Users> {
     file: Express.Multer.File,
   ): Promise<void> {
     const { email, password, passwordConfirm, name, surname } = userRegisterDto;
-    const fileSize = 5 * 1024 * 1024; // 5 MB
-    let profilePicturePath = 'DefaultAvatar.png';
+    let profilePicturePath = DEFAULT_AVATAR;
 
     if (file != undefined) {
-      if (file.size < fileSize) {
+      if (file.size < FILE_SIZE_LIMIT) {
         profilePicturePath = file.filename;
       }
     }
@@ -44,7 +45,7 @@ export class AuthRepository extends Repository<Users> {
       });
       try {
         await this.save(user);
-        this.logger.verbose(`User with ${email} email is saved in a database!`);
+        this.logger.log(`User with ${email} email is saved in a database!`);
       } catch (error) {
         //Catches Duplicate email with error code 23505
         if (error.code === '23505') {

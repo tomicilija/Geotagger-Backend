@@ -96,12 +96,14 @@ export class UserController {
     return this.userService.updatePassword(user, updatePasswordDto);
   }
 
+  // Requests token for new password
   @Post('forgot-password')
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<void> {
     const resetToken = await this.userService.generateResetToken(forgotPasswordDto);
     await this.userService.sendResetEmail(forgotPasswordDto, resetToken);
   } 
 
+  // Sets new password
   @Patch('reset-password')
   async resetPassword(
     @Body() reserPasswordDto: ResetPasswordDto,

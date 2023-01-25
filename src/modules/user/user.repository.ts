@@ -17,8 +17,10 @@ import { isUUID } from 'validator';
 import { v4 as uuid } from 'uuid';
 import * as nodemailer from 'nodemailer';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { EnvVars } from 'src/common/constants/env-vars.contant';
 import { ForgotPasswordDto } from './dto/forgot-password.dto copy';
+
+const DEFAULT_AVATAR = 'DefaultAvatar.png';
+const FILE_SIZE_LIMIT = 5 * 1024 * 1024; // 5 MB
 
 @EntityRepository(Users)
 export class UserRepository extends Repository<Users> {
@@ -31,9 +33,6 @@ export class UserRepository extends Repository<Users> {
       this.logger.error(`User wth emil: "${user.email}" not found!`);
       throw new NotFoundException(`User wth emil: "${user.email}" not found!`);
     }
-    this.logger.verbose(
-      `Fetched logged in user "${found.name} ${found.surname}" from the database!`,
-    );
     return found;
   }
 
@@ -60,7 +59,7 @@ export class UserRepository extends Repository<Users> {
         throw new NotFoundException(`User wth ID: "${user_id}" not found`);
       }
       this.logger.verbose(
-        `Fetched user "${found.name} ${found.surname}" by id from the database!`,
+        `Fetched user with ${found.email} email by id from the database!`,
       );
       return found;
     }
@@ -75,7 +74,7 @@ export class UserRepository extends Repository<Users> {
       .where('user_id = :id', { id: user.id })
       .execute();
     this.logger.verbose(
-      `User with email: ${user.email} has successfully deleted all of their guesses!`,
+      `User with ${user.email} email has successfully deleted all of their guesses!`,
     );
     await this.createQueryBuilder()
       .delete()
@@ -83,7 +82,7 @@ export class UserRepository extends Repository<Users> {
       .where('user_id = :id', { id: user.id })
       .execute();
     this.logger.verbose(
-      `User with email: ${user.email} has successfully deleted all of their locations!`,
+      `User with email ${user.email} has successfully deleted all of their locations!`,
     );
     const result = await this.delete(user.id);
     if (result.affected == 0) {
@@ -91,7 +90,7 @@ export class UserRepository extends Repository<Users> {
       throw new NotFoundException(`User with ID: "${user.id}" not fund!`);
     }
     this.logger.verbose(
-      `User with email: ${user.email} has successfully deleted their profile!`,
+      `User with email ${user.email} has successfully deleted their account!`,
     );
   }
 
@@ -116,20 +115,20 @@ export class UserRepository extends Repository<Users> {
     newUser.surname = surname;
 
     await this.save(newUser);
-    this.logger.verbose(`User with ${email} email is updated!`);
+    this.logger.log(`User with ${email} email is updated!`);
 
     return newUser;
   }
+
   // Updates profile picture of loggend in user
   async updateProfilePicture(
     user: Users,
     file: Express.Multer.File,
   ): Promise<Users> {
-    const fileSize = 5 * 1024 * 1024; // 5 MB
-    let profilePicturePath = 'DefaultAvatar.png';
+    let profilePicturePath = DEFAULT_AVATAR;
 
     if (file != undefined) {
-      if (file.size < fileSize) {
+      if (file.size < FILE_SIZE_LIMIT) {
         profilePicturePath = file.filename;
       }
     }
@@ -139,7 +138,7 @@ export class UserRepository extends Repository<Users> {
     newUser.profilePicture = profilePicturePath;
 
     await this.save(newUser);
-    this.logger.verbose(
+    this.logger.log(
       `User profile picutre with ${user.email} email is updated!`,
     );
 
@@ -174,7 +173,7 @@ export class UserRepository extends Repository<Users> {
       }
       return newUser;
     } else {
-      this.logger.verbose(`Current password is  incorrect!`);
+      this.logger.error(`Current password is  incorrect!`);
       throw new UnauthorizedException('Current password is incorrect!');
     }
   }
@@ -222,7 +221,7 @@ export class UserRepository extends Repository<Users> {
         this.logger.error(error);
         throw new Error(error);
       } else {
-        this.logger.verbose(`Email sent: ${info.response}`);
+        this.logger.verbose(`Email with password reset token sent: ${info.response}`);
         return true;
       }
     });
@@ -239,10 +238,10 @@ export class UserRepository extends Repository<Users> {
       throw new BadRequestException(`Url does not match email adress!`);
     } else if (!user.resetTokenExpiration) {
       this.logger.error(
-        `Url is no longer valid, send new request for password reset!`,
+        `Url is invalid, send new request for password reset!`,
       );
       throw new BadRequestException(
-        `Url is no longer valid, send new request for password reset!`,
+        `Url is invalid, send new request for password reset!`,
       );
     } else if (user.resetTokenExpiration < new Date()) {
       this.logger.error(
@@ -268,7 +267,7 @@ export class UserRepository extends Repository<Users> {
         user.resetToken = null;
         user.resetTokenExpiration = null;
         await this.save(user);
-        this.logger.verbose(`User password has been reseted!`);
+        this.logger.log(`User password has been reseted!`);
       }
       return true;
     }

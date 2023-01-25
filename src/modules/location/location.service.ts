@@ -24,7 +24,11 @@ export class LocationService {
     return this.locationRepository.getLocations(page, size);
   }
 
-  async getMyLocations(user: Users, page: number, size: number): Promise<Locations[]> {
+  async getMyLocations(
+    user: Users,
+    page: number,
+    size: number,
+  ): Promise<Locations[]> {
     return this.locationRepository.getMyLocations(user, page, size);
   }
 

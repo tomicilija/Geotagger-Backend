@@ -9,6 +9,9 @@ import {
 } from '@nestjs/common';
 import { join } from 'path';
 
+const DEFAULT_IMAGE = 'DefaultAvatar.png';
+const FILE_SIZE_LIMIT = 5 * 1024 * 1024; // 5 MB
+
 @EntityRepository(Locations)
 export class LocationRepository extends Repository<Locations> {
   private logger = new Logger('LocationRepository');
@@ -19,12 +22,10 @@ export class LocationRepository extends Repository<Locations> {
     file: Express.Multer.File,
   ): Promise<Locations> {
     const { name, latitude, longitude } = locationDto;
-
-    const fileSize = 5 * 1024 * 1024; // 5 MB
-    let locationImagePath = 'locationImage.jpg';
+    let locationImagePath = DEFAULT_IMAGE;
 
     if (file != undefined) {
-      if (file.size < fileSize) {
+      if (file.size < FILE_SIZE_LIMIT) {
         locationImagePath = file.filename;
       }
     }
@@ -38,7 +39,7 @@ export class LocationRepository extends Repository<Locations> {
 
     await this.save(location);
     this.logger.verbose(
-      `User "${user.name} ${user.surname}" added a new location "${name}"!`,
+      `User with email ${user.email} added a new location "${name}"!`,
     );
     return location;
   }
@@ -50,10 +51,6 @@ export class LocationRepository extends Repository<Locations> {
       },
       take: size,
     });
-    this.logger.verbose(
-      `Fetched ${getLocations.length} locations from the database!`,
-    );
-
     return getLocations;
   }
 
@@ -67,10 +64,6 @@ export class LocationRepository extends Repository<Locations> {
       .where('user_id = :id', { id })
       .take(size)
       .getMany();
-
-    this.logger.verbose(
-      `Fetched ${getLocations.length} locations from the database!`,
-    );
     return getLocations;
   }
 
@@ -87,16 +80,16 @@ export class LocationRepository extends Repository<Locations> {
   }
 
   async getRandomLocationsId(): Promise<Locations[]> {
+    const totalLocations = await this.count();
+    const offset = Math.floor(Math.random() * totalLocations);
     const getRandomLocation = this.createQueryBuilder()
       .select([
         'location.id',
       ])
       .from(Locations, 'location')
-      .orderBy('RANDOM()')
+      .offset(offset)
       .limit(3)
       .getMany();
-
-    this.logger.verbose(`Fetched random locations from the database!`);
     return getRandomLocation;
   }
 
@@ -106,7 +99,7 @@ export class LocationRepository extends Repository<Locations> {
       this.logger.error(`Location with ID: ${id} not found!`);
       throw new NotFoundException(`Location with ID: ${id} not found!`);
     }
-    this.logger.verbose(`Fetched location with ID: ${id} from the database!`);
+    this.logger.log(`Fetched location with ID: ${id} from the database!`);
     return location;
   }
 
@@ -141,19 +134,17 @@ export class LocationRepository extends Repository<Locations> {
     locationDto: LocationDto,
     file: Express.Multer.File,
   ): Promise<Locations> {
-    console.log('1');
     const { name, latitude, longitude } = locationDto;
     const location = await this.findOne(id);
     if (!location) {
       this.logger.error(`Location with ID: ${id} not found!`);
       throw new NotFoundException(`Location with ID: ${id} not found!`);
     }
-
-    const fileSize = 5 * 1024 * 1024; // 5 MB
-    let locationImagePath = 'locationImage.jpg';
+    
+    let locationImagePath = DEFAULT_IMAGE;
 
     if (file != undefined) {
-      if (file.size < fileSize) {
+      if (file.size < FILE_SIZE_LIMIT) {
         locationImagePath = file.filename;
       }
     }
@@ -164,7 +155,7 @@ export class LocationRepository extends Repository<Locations> {
       location.longitude = longitude;
       location.image = locationImagePath;
       await this.save(location);
-      this.logger.verbose(
+      this.logger.log(
         `User with email: ${user.email} successfully edited the location with id ${id}!`,
       );
       return location;

@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -20,29 +16,24 @@ export class AuthService {
   ) {}
   private logger = new Logger('AuthRepository');
 
-  async register(userRegisterDto: UserRegisterDto, file: Express.Multer.File): Promise<void> {
+  async register(
+    userRegisterDto: UserRegisterDto,
+    file: Express.Multer.File,
+  ): Promise<void> {
     return this.authRepository.register(userRegisterDto, file);
   }
 
   async login(loginUserDto: UserLoginDto): Promise<{ accessToken: string }> {
     const { email, password } = loginUserDto;
-    const user = await this.authRepository.findOne({
-      where: {
-        email: email,
-      },
-    });
+    const user = await this.authRepository.findOne({ email });
 
     if (user && (await bcrypt.compare(password, user.password))) {
       const payload: JwtPayloadDto = { email };
       const accessToken: string = this.jwtService.sign(payload);
-      this.logger.verbose(
-        `User with "${email}" email is logged in!`,
-      );
+      this.logger.log(`User with "${email}" email is logged in!`);
       return { accessToken };
     } else {
-      this.logger.verbose(
-        `User login creentials are incorrect!`,
-      );
+      this.logger.error(`User login creentials are incorrect!`);
       throw new UnauthorizedException('Please check your login creentials');
     }
   }
